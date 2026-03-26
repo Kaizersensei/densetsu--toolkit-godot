@@ -11,7 +11,7 @@ const OCCLUSION_PRUNE_HELPER_SCRIPT: String = "res://addons/densetsu_tool_suite/
 const SELECT_SAME_MESH_HELPER_SCRIPT: String = "res://addons/densetsu_tool_suite/helpers/select_same_mesh_helper.gd"
 const SELECT_INTERSECTING_MESH_HELPER_SCRIPT: String = "res://addons/densetsu_tool_suite/helpers/select_intersecting_mesh_helper.gd"
 const MESH_SUBDIVIDE_HELPER_SCRIPT: String = "res://addons/densetsu_tool_suite/helpers/mesh_subdivide_helper.gd"
-const DENSETSU_TOOL_MENU_ROOT: String = "Densetsu"
+const DENSETSU_TOOL_MENU_ROOT: String = "Toolkit"
 const MOVE_HELPER_METADATA_SECTION: String = "densetsu_tool_suite"
 const MOVE_HELPER_METADATA_KEY_LAST_FOLDER: String = "move_last_folder"
 
@@ -85,7 +85,7 @@ var _move_folder_dialog: FileDialog
 var _move_pending_paths: PackedStringArray = PackedStringArray()
 var _filesystem_refresh_pending: bool = false
 
-class _DensetsuSuiteContextMenuPlugin:
+class _ToolkitContextMenuPlugin:
 	extends EditorContextMenuPlugin
 	var _owner: EditorPlugin
 
@@ -95,27 +95,27 @@ class _DensetsuSuiteContextMenuPlugin:
 	func _popup_menu(paths: PackedStringArray) -> void:
 		if paths.is_empty():
 			return
-		add_context_menu_item("Densetsu: Pack to Static Mesh", Callable(_owner, "_on_ctx_static_pack"))
-		add_context_menu_item("Densetsu: Extract ArrayMeshes (Per File)", Callable(_owner, "_on_ctx_extract_mesh_per_file"))
-		add_context_menu_item("Densetsu: Extract ArrayMeshes (Common)", Callable(_owner, "_on_ctx_extract_mesh_common"))
-		add_context_menu_item("Densetsu: Extract Material Meshes (Per File)", Callable(_owner, "_on_ctx_extract_material_per_file"))
-		add_context_menu_item("Densetsu: Extract Material Meshes (Common)", Callable(_owner, "_on_ctx_extract_material_common"))
-		add_context_menu_item("Densetsu: Extract Combined Mesh (Per File)", Callable(_owner, "_on_ctx_extract_combined_per_file"))
-		add_context_menu_item("Densetsu: Extract Combined Mesh (Common)", Callable(_owner, "_on_ctx_extract_combined_common"))
-		add_context_menu_item("Densetsu: Resize Textures POT (Overwrite)", Callable(_owner, "_on_ctx_resize_overwrite"))
-		add_context_menu_item("Densetsu: Resize Textures POT (Copy)", Callable(_owner, "_on_ctx_resize_copy"))
-		add_context_menu_item("Densetsu: Flip Image Horizontal (Copy)", Callable(_owner, "_on_ctx_flip_image_h"))
-		add_context_menu_item("Densetsu: Flip Image Vertical (Copy)", Callable(_owner, "_on_ctx_flip_image_v"))
-		add_context_menu_item("Densetsu: Rotate Image 90 (Copy)", Callable(_owner, "_on_ctx_rotate_image_90"))
-		add_context_menu_item("Densetsu: Rotate Image 180 (Copy)", Callable(_owner, "_on_ctx_rotate_image_180"))
-		add_context_menu_item("Densetsu: Rotate Image 270 (Copy)", Callable(_owner, "_on_ctx_rotate_image_270"))
-		add_context_menu_item("Densetsu: Reassign Pivot (Center Mass)", Callable(_owner, "_on_ctx_pivot_center_mass"))
-		add_context_menu_item("Densetsu: Reassign Pivot (Center Bottom)", Callable(_owner, "_on_ctx_pivot_center_bottom"))
-		add_context_menu_item("Densetsu: Convert Mesh TRES/RES to OBJ", Callable(_owner, "_on_ctx_convert_mesh_res_to_obj"))
-		add_context_menu_item("Densetsu: Subdivide Mesh -> OBJ (1x/2x/4x)", Callable(_owner, "_on_ctx_subdivide_mesh_to_obj"))
-		add_context_menu_item("Densetsu: Replace Scene TRES/RES Refs with Selected OBJ", Callable(_owner, "_on_ctx_replace_mesh_refs_with_obj"))
-		add_context_menu_item("Densetsu: Move Selected To Folder...", Callable(_owner, "_on_ctx_move_selected_to_folder"))
-		add_context_menu_item("Densetsu: Force Thumbnail Refresh (Selected)", Callable(_owner, "_on_ctx_force_thumbnail_refresh_selected"))
+		add_context_menu_item("Toolkit: Pack to Static Mesh", Callable(_owner, "_on_ctx_static_pack"))
+		add_context_menu_item("Toolkit: Extract ArrayMeshes (Per File)", Callable(_owner, "_on_ctx_extract_mesh_per_file"))
+		add_context_menu_item("Toolkit: Extract ArrayMeshes (Common)", Callable(_owner, "_on_ctx_extract_mesh_common"))
+		add_context_menu_item("Toolkit: Extract Material Meshes (Per File)", Callable(_owner, "_on_ctx_extract_material_per_file"))
+		add_context_menu_item("Toolkit: Extract Material Meshes (Common)", Callable(_owner, "_on_ctx_extract_material_common"))
+		add_context_menu_item("Toolkit: Extract Combined Mesh (Per File)", Callable(_owner, "_on_ctx_extract_combined_per_file"))
+		add_context_menu_item("Toolkit: Extract Combined Mesh (Common)", Callable(_owner, "_on_ctx_extract_combined_common"))
+		add_context_menu_item("Toolkit: Resize Textures POT (Overwrite)", Callable(_owner, "_on_ctx_resize_overwrite"))
+		add_context_menu_item("Toolkit: Resize Textures POT (Copy)", Callable(_owner, "_on_ctx_resize_copy"))
+		add_context_menu_item("Toolkit: Flip Image Horizontal (Copy)", Callable(_owner, "_on_ctx_flip_image_h"))
+		add_context_menu_item("Toolkit: Flip Image Vertical (Copy)", Callable(_owner, "_on_ctx_flip_image_v"))
+		add_context_menu_item("Toolkit: Rotate Image 90 (Copy)", Callable(_owner, "_on_ctx_rotate_image_90"))
+		add_context_menu_item("Toolkit: Rotate Image 180 (Copy)", Callable(_owner, "_on_ctx_rotate_image_180"))
+		add_context_menu_item("Toolkit: Rotate Image 270 (Copy)", Callable(_owner, "_on_ctx_rotate_image_270"))
+		add_context_menu_item("Toolkit: Reassign Pivot (Center Mass)", Callable(_owner, "_on_ctx_pivot_center_mass"))
+		add_context_menu_item("Toolkit: Reassign Pivot (Center Bottom)", Callable(_owner, "_on_ctx_pivot_center_bottom"))
+		add_context_menu_item("Toolkit: Convert Mesh TRES/RES to OBJ", Callable(_owner, "_on_ctx_convert_mesh_res_to_obj"))
+		add_context_menu_item("Toolkit: Subdivide Mesh -> OBJ (1x/2x/4x)", Callable(_owner, "_on_ctx_subdivide_mesh_to_obj"))
+		add_context_menu_item("Toolkit: Replace Scene TRES/RES Refs with Selected OBJ", Callable(_owner, "_on_ctx_replace_mesh_refs_with_obj"))
+		add_context_menu_item("Toolkit: Move Selected To Folder...", Callable(_owner, "_on_ctx_move_selected_to_folder"))
+		add_context_menu_item("Toolkit: Force Thumbnail Refresh (Selected)", Callable(_owner, "_on_ctx_force_thumbnail_refresh_selected"))
 
 func _enter_tree() -> void:
 	_static_pack_helper = _instantiate_plugin(STATIC_PACK_PLUGIN_SCRIPT)
@@ -134,7 +134,7 @@ func _enter_tree() -> void:
 	_build_move_dialog()
 	_build_tool_menus()
 
-	_ctx_plugin = _DensetsuSuiteContextMenuPlugin.new(self)
+	_ctx_plugin = _ToolkitContextMenuPlugin.new(self)
 	add_context_menu_plugin(EditorContextMenuPlugin.CONTEXT_SLOT_FILESYSTEM, _ctx_plugin)
 
 func _exit_tree() -> void:
@@ -169,14 +169,14 @@ func _dispose_node(node: Variant) -> void:
 func _instantiate_plugin(path: String) -> Object:
 	var script_res: Script = load(path)
 	if script_res == null:
-		push_warning("Densetsu Suite: failed to load helper plugin script: " + path)
+		push_warning("Toolkit: failed to load helper plugin script: " + path)
 		return null
 	if script_res.has_method("can_instantiate") and not script_res.can_instantiate():
-		push_warning("Densetsu Suite: helper script is not instantiable: " + path)
+		push_warning("Toolkit: helper script is not instantiable: " + path)
 		return null
 	var instance: Object = script_res.new()
 	if instance == null:
-		push_warning("Densetsu Suite: failed to instantiate helper plugin script: " + path)
+		push_warning("Toolkit: failed to instantiate helper plugin script: " + path)
 	return instance
 
 func _build_tool_menus() -> void:
@@ -184,7 +184,7 @@ func _build_tool_menus() -> void:
 	_tool_action_map.clear()
 
 	_tool_root_menu = PopupMenu.new()
-	_tool_root_menu.name = &"DensetsuToolsRootMenu"
+	_tool_root_menu.name = &"ToolkitRootMenu"
 
 	var scene_menu: PopupMenu = _create_tool_submenu("Scene")
 	var geometry_menu: PopupMenu = _create_tool_submenu("Geometry")
@@ -246,7 +246,7 @@ func _register_tool_menu_item(menu: PopupMenu, id: int, label: String, callback:
 func _on_tool_menu_id_pressed(id: int) -> void:
 	var callback_variant: Variant = _tool_action_map.get(id, null)
 	if callback_variant == null:
-		push_warning("Densetsu Suite: Unhandled tool menu id %d" % id)
+		push_warning("Toolkit: Unhandled tool menu id %d" % id)
 		return
 	var callback: Callable = callback_variant
 	if callback.is_valid():
@@ -323,7 +323,7 @@ func _build_tool_log_dialog() -> void:
 	_dispose_node(_tool_log_dialog)
 
 	_tool_log_dialog = AcceptDialog.new()
-	_tool_log_dialog.title = "Densetsu Tool Log"
+	_tool_log_dialog.title = "Toolkit Log"
 	_tool_log_dialog.ok_button_text = "Close"
 	_tool_log_dialog.min_size = Vector2i(540, 340)
 	add_child(_tool_log_dialog)
@@ -389,13 +389,13 @@ func _on_move_dialog_confirmed() -> void:
 
 func _run_move_selected_to_folder(paths: PackedStringArray, destination_dir: String) -> void:
 	if paths.is_empty():
-		push_warning("Densetsu Suite: Nothing selected to move.")
+		push_warning("Toolkit: Nothing selected to move.")
 		return
 	if destination_dir.is_empty():
-		push_warning("Densetsu Suite: Destination folder is empty.")
+		push_warning("Toolkit: Destination folder is empty.")
 		return
 	if not destination_dir.begins_with("res://"):
-		push_warning("Densetsu Suite: Destination folder must be inside the project (res://...).")
+		push_warning("Toolkit: Destination folder must be inside the project (res://...).")
 		return
 	_set_last_move_destination_folder(destination_dir)
 
@@ -439,7 +439,7 @@ func _run_move_selected_to_folder(paths: PackedStringArray, destination_dir: Str
 
 	_request_filesystem_refresh()
 
-	var summary: String = "Densetsu Suite: move complete moved=%d skipped=%d failed=%d dest=%s" % [moved, skipped, failed, destination_dir]
+	var summary: String = "Toolkit: move complete moved=%d skipped=%d failed=%d dest=%s" % [moved, skipped, failed, destination_dir]
 	print(summary)
 	if failed > 0:
 		push_warning(summary + "\n" + "\n".join(fail_lines))
@@ -677,13 +677,13 @@ func _get_current_edited_scene_path() -> String:
 
 func _run_static_pack(paths: PackedStringArray) -> void:
 	if _static_pack_helper == null:
-		push_warning("Densetsu Suite: Static Pack helper unavailable.")
+		push_warning("Toolkit: Static Pack helper unavailable.")
 		return
 	if _static_pack_helper.has_method("_pack_paths"):
 		_static_pack_helper.call("_pack_paths", paths)
 		_request_filesystem_refresh()
 	else:
-		push_warning("Densetsu Suite: Static Pack helper missing _pack_paths.")
+		push_warning("Toolkit: Static Pack helper missing _pack_paths.")
 
 func _request_filesystem_refresh() -> void:
 	if _filesystem_refresh_pending:
@@ -706,82 +706,82 @@ func _flush_filesystem_refresh() -> void:
 
 func _run_array_extract(paths: PackedStringArray, mode: int, output_mode: int) -> void:
 	if _array_extract_helper == null:
-		push_warning("Densetsu Suite: ArrayMesh Extract helper unavailable.")
+		push_warning("Toolkit: ArrayMesh Extract helper unavailable.")
 		return
 	if _array_extract_helper.has_method("_extract_paths"):
 		_array_extract_helper.call("_extract_paths", paths, mode, output_mode)
 	else:
-		push_warning("Densetsu Suite: ArrayMesh Extract helper missing _extract_paths.")
+		push_warning("Toolkit: ArrayMesh Extract helper missing _extract_paths.")
 
 func _run_texture_resize(paths: PackedStringArray, mode: int) -> void:
 	if _texture_resize_helper == null:
-		push_warning("Densetsu Suite: Texture Resize helper unavailable.")
+		push_warning("Toolkit: Texture Resize helper unavailable.")
 		return
 	if _texture_resize_helper.has_method("_resize_paths"):
 		_texture_resize_helper.call("_resize_paths", paths, mode)
 	else:
-		push_warning("Densetsu Suite: Texture Resize helper missing _resize_paths.")
+		push_warning("Toolkit: Texture Resize helper missing _resize_paths.")
 
 func _run_image_transform(paths: PackedStringArray, mode: int) -> void:
 	if _image_transform_helper == null:
 		_image_transform_helper = _instantiate_plugin(IMAGE_TRANSFORM_HELPER_SCRIPT)
 	if _image_transform_helper == null:
-		push_warning("Densetsu Suite: Image Transform helper unavailable.")
+		push_warning("Toolkit: Image Transform helper unavailable.")
 		return
 	if not _image_transform_helper.has_method("transform_image_paths"):
-		push_warning("Densetsu Suite: Image Transform helper missing transform_image_paths.")
+		push_warning("Toolkit: Image Transform helper missing transform_image_paths.")
 		return
 	var result: Dictionary = _image_transform_helper.call("transform_image_paths", paths, mode, get_editor_interface())
 	var converted: int = int(result.get("converted", 0))
 	var failed: int = int(result.get("failed", 0))
 	var skipped: int = int(result.get("skipped", 0))
-	print("Densetsu Suite: Image transform converted=%d failed=%d skipped=%d" % [converted, failed, skipped])
+	print("Toolkit: Image transform converted=%d failed=%d skipped=%d" % [converted, failed, skipped])
 
 func _run_pivot_reassign(paths: PackedStringArray, mode: int) -> void:
 	if _pivot_reassign_helper == null:
-		push_warning("Densetsu Suite: Pivot Reassign helper unavailable.")
+		push_warning("Toolkit: Pivot Reassign helper unavailable.")
 		return
 	if _pivot_reassign_helper.has_method("reassign_pivot_paths"):
 		_pivot_reassign_helper.call("reassign_pivot_paths", paths, mode, get_editor_interface())
 	else:
-		push_warning("Densetsu Suite: Pivot Reassign helper missing reassign_pivot_paths.")
+		push_warning("Toolkit: Pivot Reassign helper missing reassign_pivot_paths.")
 
 func _run_convert_mesh_res_to_obj(paths: PackedStringArray) -> void:
 	if not _ensure_mesh_obj_helper():
-		push_warning("Densetsu Suite: Mesh OBJ helper unavailable.")
+		push_warning("Toolkit: Mesh OBJ helper unavailable.")
 		return
 	if not _mesh_obj_helper.has_method("convert_mesh_resource_paths_to_obj"):
-		push_warning("Densetsu Suite: Mesh OBJ helper missing convert_mesh_resource_paths_to_obj.")
+		push_warning("Toolkit: Mesh OBJ helper missing convert_mesh_resource_paths_to_obj.")
 		return
 	var result: Dictionary = _mesh_obj_helper.call("convert_mesh_resource_paths_to_obj", paths, get_editor_interface())
 	var converted: int = int(result.get("converted", 0))
 	var failed: int = int(result.get("failed", 0))
 	var skipped: int = int(result.get("skipped", 0))
-	print("Densetsu Suite: Mesh TRES/RES -> OBJ converted=%d failed=%d skipped=%d" % [converted, failed, skipped])
+	print("Toolkit: Mesh TRES/RES -> OBJ converted=%d failed=%d skipped=%d" % [converted, failed, skipped])
 
 func _run_subdivide_mesh_to_obj(paths: PackedStringArray) -> void:
 	if _mesh_subdivide_helper == null:
 		_mesh_subdivide_helper = _instantiate_plugin(MESH_SUBDIVIDE_HELPER_SCRIPT)
 	if _mesh_subdivide_helper == null:
-		push_warning("Densetsu Suite: Mesh Subdivide helper unavailable.")
+		push_warning("Toolkit: Mesh Subdivide helper unavailable.")
 		return
 	if not _mesh_subdivide_helper.has_method("subdivide_mesh_paths_to_obj"):
-		push_warning("Densetsu Suite: Mesh Subdivide helper missing subdivide_mesh_paths_to_obj.")
+		push_warning("Toolkit: Mesh Subdivide helper missing subdivide_mesh_paths_to_obj.")
 		return
 	var result: Dictionary = _mesh_subdivide_helper.call("subdivide_mesh_paths_to_obj", paths, get_editor_interface())
 	var converted: int = int(result.get("converted", 0))
 	var failed: int = int(result.get("failed", 0))
 	var skipped: int = int(result.get("skipped", 0))
-	print("Densetsu Suite: Mesh Subdivide -> OBJ converted=%d failed=%d skipped=%d" % [converted, failed, skipped])
+	print("Toolkit: Mesh Subdivide -> OBJ converted=%d failed=%d skipped=%d" % [converted, failed, skipped])
 
 func _run_prune_occluded_mesh_instances() -> void:
 	if _occlusion_prune_helper == null:
 		_occlusion_prune_helper = _instantiate_plugin(OCCLUSION_PRUNE_HELPER_SCRIPT)
 	if _occlusion_prune_helper == null:
-		push_warning("Densetsu Suite: Occlusion prune helper unavailable.")
+		push_warning("Toolkit: Occlusion prune helper unavailable.")
 		return
 	if not _occlusion_prune_helper.has_method("prune_occluded_mesh_instances"):
-		push_warning("Densetsu Suite: Occlusion prune helper missing prune_occluded_mesh_instances.")
+		push_warning("Toolkit: Occlusion prune helper missing prune_occluded_mesh_instances.")
 		return
 	var result: Dictionary = _occlusion_prune_helper.call(
 		"prune_occluded_mesh_instances",
@@ -791,74 +791,74 @@ func _run_prune_occluded_mesh_instances() -> void:
 		prune_occluded_use_selection_scope
 	)
 	if not bool(result.get("ok", false)):
-		push_warning("Densetsu Suite: " + str(result.get("error", "Occlusion prune failed.")))
+		push_warning("Toolkit: " + str(result.get("error", "Occlusion prune failed.")))
 		return
 	var scope_path: String = str(result.get("scope_path", ""))
 	var scanned: int = int(result.get("scanned", 0))
 	var removed: int = int(result.get("removed", 0))
 	var retained: int = int(result.get("retained", 0))
-	print("Densetsu Suite: Occlusion prune scope=%s scanned=%d removed=%d retained=%d" % [scope_path, scanned, removed, retained])
+	print("Toolkit: Occlusion prune scope=%s scanned=%d removed=%d retained=%d" % [scope_path, scanned, removed, retained])
 
 func _run_select_same_mesh_nodes() -> void:
 	if _select_same_mesh_helper == null:
 		_select_same_mesh_helper = _instantiate_plugin(SELECT_SAME_MESH_HELPER_SCRIPT)
 	if _select_same_mesh_helper == null:
-		push_warning("Densetsu Suite: Select Same Mesh helper unavailable.")
+		push_warning("Toolkit: Select Same Mesh helper unavailable.")
 		return
 	if not _select_same_mesh_helper.has_method("select_same_mesh_nodes"):
-		push_warning("Densetsu Suite: Select Same Mesh helper missing select_same_mesh_nodes.")
+		push_warning("Toolkit: Select Same Mesh helper missing select_same_mesh_nodes.")
 		return
 	var result: Dictionary = _select_same_mesh_helper.call("select_same_mesh_nodes", get_editor_interface())
 	if not bool(result.get("ok", false)):
-		push_warning("Densetsu Suite: " + str(result.get("error", "Select same mesh failed.")))
+		push_warning("Toolkit: " + str(result.get("error", "Select same mesh failed.")))
 		return
 	var selected: int = int(result.get("selected", 0))
 	var skipped: int = int(result.get("skipped", 0))
-	print("Densetsu Suite: Select same mesh selected=%d skipped=%d" % [selected, skipped])
+	print("Toolkit: Select same mesh selected=%d skipped=%d" % [selected, skipped])
 
 func _run_select_intersecting_mesh_nodes() -> void:
 	if _select_intersecting_mesh_helper == null:
 		_select_intersecting_mesh_helper = _instantiate_plugin(SELECT_INTERSECTING_MESH_HELPER_SCRIPT)
 	if _select_intersecting_mesh_helper == null:
-		push_warning("Densetsu Suite: Select Intersecting Mesh helper unavailable.")
+		push_warning("Toolkit: Select Intersecting Mesh helper unavailable.")
 		return
 	if not _select_intersecting_mesh_helper.has_method("select_intersecting_mesh_nodes"):
-		push_warning("Densetsu Suite: Select Intersecting Mesh helper missing select_intersecting_mesh_nodes.")
+		push_warning("Toolkit: Select Intersecting Mesh helper missing select_intersecting_mesh_nodes.")
 		return
 	var result: Dictionary = _select_intersecting_mesh_helper.call("select_intersecting_mesh_nodes", get_editor_interface())
 	if not bool(result.get("ok", false)):
-		push_warning("Densetsu Suite: " + str(result.get("error", "Select intersecting mesh failed.")))
+		push_warning("Toolkit: " + str(result.get("error", "Select intersecting mesh failed.")))
 		return
 	var selected: int = int(result.get("selected", 0))
 	var skipped: int = int(result.get("skipped", 0))
-	print("Densetsu Suite: Select intersecting mesh selected=%d skipped=%d" % [selected, skipped])
+	print("Toolkit: Select intersecting mesh selected=%d skipped=%d" % [selected, skipped])
 
 func _run_editor_script(script_path: String, action_name: String) -> bool:
 	var script_res: Script = load(script_path)
 	if script_res == null:
-		push_warning("Densetsu Suite: Missing script for " + action_name + ": " + script_path)
+		push_warning("Toolkit: Missing script for " + action_name + ": " + script_path)
 		return false
 	if script_res.has_method("can_instantiate") and not script_res.can_instantiate():
-		push_warning("Densetsu Suite: Script is not instantiable for " + action_name + ": " + script_path)
+		push_warning("Toolkit: Script is not instantiable for " + action_name + ": " + script_path)
 		return false
 	var instance: Object = script_res.new()
 	if instance == null:
-		push_warning("Densetsu Suite: Failed to create script instance for " + action_name + ".")
+		push_warning("Toolkit: Failed to create script instance for " + action_name + ".")
 		return false
 	if not instance.has_method("_run"):
-		push_warning("Densetsu Suite: Script has no _run() for " + action_name + ".")
+		push_warning("Toolkit: Script has no _run() for " + action_name + ".")
 		return false
-	print("Densetsu Suite: Running " + action_name + "...")
+	print("Toolkit: Running " + action_name + "...")
 	instance.call("_run")
-	print("Densetsu Suite: Completed " + action_name + ".")
+	print("Toolkit: Completed " + action_name + ".")
 	return true
 
 func _run_replace_mesh_refs_with_obj(paths: PackedStringArray) -> void:
 	if not _ensure_mesh_obj_helper():
-		push_warning("Densetsu Suite: Mesh OBJ helper unavailable.")
+		push_warning("Toolkit: Mesh OBJ helper unavailable.")
 		return
 	if not _mesh_obj_helper.has_method("replace_scene_mesh_references_with_obj"):
-		push_warning("Densetsu Suite: Mesh OBJ helper missing replace_scene_mesh_references_with_obj.")
+		push_warning("Toolkit: Mesh OBJ helper missing replace_scene_mesh_references_with_obj.")
 		return
 	var result: Dictionary = _mesh_obj_helper.call("replace_scene_mesh_references_with_obj", paths, get_editor_interface())
 	var updated_scenes: int = int(result.get("updated_scenes", 0))
@@ -866,8 +866,8 @@ func _run_replace_mesh_refs_with_obj(paths: PackedStringArray) -> void:
 	var failed: int = int(result.get("failed", 0))
 	if not bool(result.get("ok", false)):
 		var err_text: String = str(result.get("error", "No matching scene references updated."))
-		push_warning("Densetsu Suite: " + err_text)
-	print("Densetsu Suite: Scene mesh refs replaced scenes=%d refs=%d failed=%d" % [updated_scenes, replacements, failed])
+		push_warning("Toolkit: " + err_text)
+	print("Toolkit: Scene mesh refs replaced scenes=%d refs=%d failed=%d" % [updated_scenes, replacements, failed])
 
 func _run_replace_mesh_refs_with_obj_project(
 	dry_run: bool = true,
@@ -877,11 +877,11 @@ func _run_replace_mesh_refs_with_obj_project(
 	obj_scope_root: String = "res://"
 ) -> void:
 	if not _ensure_mesh_obj_helper():
-		push_warning("Densetsu Suite: Mesh OBJ helper unavailable.")
+		push_warning("Toolkit: Mesh OBJ helper unavailable.")
 		return
 	if not _mesh_obj_helper.has_method("replace_project_mesh_references_with_obj_with_options"):
 		if not _mesh_obj_helper.has_method("replace_project_mesh_references_with_obj_auto"):
-			push_warning("Densetsu Suite: Mesh OBJ helper missing project replacement methods.")
+			push_warning("Toolkit: Mesh OBJ helper missing project replacement methods.")
 			return
 		var legacy_result: Dictionary = _mesh_obj_helper.call("replace_project_mesh_references_with_obj_auto", get_editor_interface())
 		_show_mesh_ref_replace_report(legacy_result)
@@ -906,9 +906,9 @@ func _run_replace_mesh_refs_with_obj_project(
 	var ambiguous: int = int(result.get("conflicts_ambiguous_fallback", 0))
 	if not bool(result.get("ok", false)):
 		var err_text: String = str(result.get("error", "No project references updated."))
-		push_warning("Densetsu Suite: " + err_text)
+		push_warning("Toolkit: " + err_text)
 	print(
-		"Densetsu Suite: Project OBJ pass scope=%s obj_scope=%s dry_run=%s scanned=%d updated_files=%d refs=%d failed=%d obj_total=%d obj_used=%d dupes=%d missing=%d ambiguous=%d"
+		"Toolkit: Project OBJ pass scope=%s obj_scope=%s dry_run=%s scanned=%d updated_files=%d refs=%d failed=%d obj_total=%d obj_used=%d dupes=%d missing=%d ambiguous=%d"
 		% [
 			str(result.get("scope_root", "res://")),
 			str(result.get("obj_scope_root", "res://")),
@@ -939,12 +939,12 @@ func _run_force_thumbnail_refresh() -> void:
 
 	var iface: EditorInterface = get_editor_interface()
 	_request_filesystem_refresh()
-	print("Densetsu Suite: forced thumbnail refresh, removed cache files=", removed)
+	print("Toolkit: forced thumbnail refresh, removed cache files=", removed)
 
 func _run_force_thumbnail_refresh_selected(paths: PackedStringArray) -> void:
 	var files: PackedStringArray = _expand_selected_resource_paths(paths)
 	if files.is_empty():
-		push_warning("Densetsu Suite: No files selected for thumbnail refresh.")
+		push_warning("Toolkit: No files selected for thumbnail refresh.")
 		return
 	var selected_names: PackedStringArray = PackedStringArray()
 	var seen: Dictionary = {}
@@ -960,7 +960,7 @@ func _run_force_thumbnail_refresh_selected(paths: PackedStringArray) -> void:
 		selected_names.append(n)
 
 	if selected_names.is_empty():
-		push_warning("Densetsu Suite: Selected paths did not resolve to refreshable files.")
+		push_warning("Toolkit: Selected paths did not resolve to refreshable files.")
 		return
 
 	var removed: int = _clear_project_editor_cache_for_files(selected_names)
@@ -971,7 +971,7 @@ func _run_force_thumbnail_refresh_selected(paths: PackedStringArray) -> void:
 	if fs != null:
 		for p in files:
 			fs.update_file(p)
-	print("Densetsu Suite: selective thumbnail refresh files=%d removed_cache=%d" % [files.size(), removed])
+	print("Toolkit: selective thumbnail refresh files=%d removed_cache=%d" % [files.size(), removed])
 
 func _resolve_godot_cli_executable(preferred_path: String) -> String:
 	var exe_path: String = preferred_path.strip_edges()
@@ -1059,14 +1059,14 @@ func _on_tool_force_thumbnail_refresh_selected() -> void:
 func _on_tool_spread_selected_on_floor() -> void:
 	var selected_nodes: Array[Node3D] = _get_selected_scene_nodes_3d()
 	if selected_nodes.is_empty():
-		push_warning("Densetsu Suite: Select one or more Node3D scene nodes first.")
+		push_warning("Toolkit: Select one or more Node3D scene nodes first.")
 		return
 	var placements: Array[Dictionary] = _compute_floor_spread_placements(selected_nodes)
 	if placements.is_empty():
-		push_warning("Densetsu Suite: Could not compute floor spread placements for the selection.")
+		push_warning("Toolkit: Could not compute floor spread placements for the selection.")
 		return
 	var undo_redo: EditorUndoRedoManager = get_undo_redo()
-	undo_redo.create_action("Densetsu: Spread Selected On Floor")
+	undo_redo.create_action("Toolkit: Spread Selected On Floor")
 	for item in placements:
 		var node: Node3D = item.get("node", null)
 		if node == null:

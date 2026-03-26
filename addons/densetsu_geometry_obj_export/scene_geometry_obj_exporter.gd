@@ -262,13 +262,13 @@ func _build_obj_text(
 	remove_enclosed_faces: bool
 ) -> Dictionary:
 	var lines := PackedStringArray()
-	lines.append("# Densetsu Geometry OBJ Export")
+	lines.append("# Toolkit OBJ Export")
 	if not mtl_abs_path.is_empty():
 		lines.append("mtllib " + _obj_path_escape(mtl_abs_path))
 	lines.append("o scene_export")
 
 	var mtl_lines: Array = []
-	mtl_lines.append("# Densetsu Geometry OBJ Export Materials")
+	mtl_lines.append("# Toolkit OBJ Export Materials")
 
 	var material_key_to_name := {}
 	var material_name_registry := {}

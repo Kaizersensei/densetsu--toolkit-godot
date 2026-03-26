@@ -337,7 +337,7 @@ func _extract_obj_groups(src_obj_path: String, out_dir: String) -> bool:
 		var out_obj_path: String = out_dir.path_join(out_name + ".obj")
 		var out_mtl_path: String = out_dir.path_join(out_name + ".mtl")
 		var out_lines: PackedStringArray = PackedStringArray()
-		out_lines.append("# Densetsu Tool Suite OBJ Group Extract")
+		out_lines.append("# Toolkit OBJ Group Extract")
 		out_lines.append("o " + _sanitize(group_name))
 		var source_mtl_paths: PackedStringArray = PackedStringArray()
 		for mtllib in mtllibs:
@@ -394,7 +394,7 @@ func _write_text_file(path: String, text: String) -> bool:
 
 func _build_group_mtl_text(source_mtl_paths: PackedStringArray, out_dir: String) -> String:
 	var merged: PackedStringArray = PackedStringArray()
-	merged.append("# Densetsu Tool Suite OBJ Group Extract")
+	merged.append("# Toolkit OBJ Group Extract")
 	var wrote_any: bool = false
 	var seen_paths: Dictionary = {}
 	for source_mtl_path in source_mtl_paths:

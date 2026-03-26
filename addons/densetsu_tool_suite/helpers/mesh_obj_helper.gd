@@ -658,7 +658,7 @@ func _build_obj_text(mesh: Mesh, object_name: String) -> String:
 
 func _build_obj_and_mtl_text(mesh: Mesh, object_name: String, mtl_file_name: String) -> Dictionary:
 	var lines: PackedStringArray = PackedStringArray()
-	lines.append("# Densetsu Tool Suite OBJ Export")
+	lines.append("# Toolkit OBJ Export")
 	lines.append("o " + _sanitize_obj_name(object_name))
 
 	var vertex_offset: int = 0
@@ -808,7 +808,7 @@ func _build_mtl_text(material_names: PackedStringArray, materials: Array[Materia
 	if material_names.is_empty():
 		return ""
 	var lines: PackedStringArray = PackedStringArray()
-	lines.append("# Densetsu Tool Suite MTL Export")
+	lines.append("# Toolkit MTL Export")
 	for i in range(material_names.size()):
 		lines.append("")
 		var material_name: String = material_names[i]
