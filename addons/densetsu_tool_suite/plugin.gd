@@ -60,7 +60,6 @@ enum ToolMenuId {
 	BUILD_TEST_RELEASE_CURRENT_SCENE,
 	OPTIMIZE_EDITING,
 	OPTIMIZE_RUNTIME,
-	POSER_CR2_TO_GLTF,
 	MOVE_SELECTED_TO_FOLDER,
 	GIT_PULL_MAIN,
 }
@@ -101,18 +100,10 @@ var _mesh_ref_replace_report_dialog: AcceptDialog
 var _mesh_ref_replace_report_text: TextEdit
 var _tool_log_dialog: AcceptDialog
 var _tool_log_text: TextEdit
-var _poser_dialog: AcceptDialog
-var _poser_file_dialog: FileDialog
 var _move_dialog: ConfirmationDialog
 var _move_destination_edit: LineEdit
 var _move_folder_dialog: FileDialog
 var _move_pending_paths: PackedStringArray = PackedStringArray()
-var _poser_pick_target: String = ""
-var _poser_cr2_edit: LineEdit
-var _poser_obj_edit: LineEdit
-var _poser_out_edit: LineEdit
-var _poser_runtime_edit: LineEdit
-var _poser_status_label: Label
 var _filesystem_refresh_pending: bool = false
 
 @export_group("Scene Tools")
@@ -241,7 +232,6 @@ func _enter_tree() -> void:
 	_build_mesh_ref_replace_report_dialog()
 	_build_tool_log_dialog()
 	_build_move_dialog()
-	_build_poser_cr2_dialog()
 	_build_tool_menus()
 
 	_ctx_plugin = _DensetsuSuiteContextMenuPlugin.new(self)
@@ -270,11 +260,6 @@ func _exit_tree() -> void:
 	_move_folder_dialog = null
 	_move_pending_paths = PackedStringArray()
 	_filesystem_refresh_pending = false
-	_dispose_node(_poser_dialog)
-	_poser_dialog = null
-	_dispose_node(_poser_file_dialog)
-	_poser_file_dialog = null
-	_poser_status_label = null
 
 
 func _dispose_node(node: Variant) -> void:
@@ -349,8 +334,6 @@ func _build_tool_menus() -> void:
 	_register_tool_menu_item(maintenance_menu, ToolMenuId.FORCE_THUMBNAIL_REFRESH_SELECTED, "Force Thumbnail Refresh (Selected)", _on_tool_force_thumbnail_refresh_selected)
 
 	_register_tool_menu_item(assets_menu, ToolMenuId.MOVE_SELECTED_TO_FOLDER, "Move Selected To Folder...", _on_tool_move_selected_to_folder)
-	assets_menu.add_separator()
-	_register_tool_menu_item(assets_menu, ToolMenuId.POSER_CR2_TO_GLTF, "Convert Poser CR2 to glTF...", _on_tool_poser_cr2_to_gltf)
 
 	add_tool_submenu_item(DENSETSU_TOOL_MENU_ROOT, _tool_root_menu)
 
@@ -522,357 +505,6 @@ func _build_move_dialog() -> void:
 	_move_folder_dialog.dir_selected.connect(_on_move_destination_selected)
 	_move_folder_dialog.canceled.connect(_on_move_destination_canceled)
 	add_child(_move_folder_dialog)
-
-
-func _build_poser_cr2_dialog() -> void:
-	_dispose_node(_poser_dialog)
-	_dispose_node(_poser_file_dialog)
-
-	_poser_dialog = AcceptDialog.new()
-	_poser_dialog.title = "Convert Poser CR2 to glTF"
-	_poser_dialog.ok_button_text = "Run"
-	_poser_dialog.confirmed.connect(_on_poser_dialog_confirmed)
-	_poser_dialog.min_size = Vector2i(680, 280)
-	add_child(_poser_dialog)
-
-	var root_box: VBoxContainer = VBoxContainer.new()
-	root_box.custom_minimum_size = Vector2(640, 0)
-	_poser_dialog.add_child(root_box)
-
-	_poser_cr2_edit = _build_poser_row(root_box, "CR2 File", "_on_poser_browse_cr2")
-	_poser_obj_edit = _build_poser_row(root_box, "Base OBJ (Optional)", "_on_poser_browse_obj")
-	_poser_out_edit = _build_poser_row(root_box, "Output glTF/GLB", "_on_poser_browse_out")
-	_poser_runtime_edit = _build_poser_row(root_box, "Runtime Root", "_on_poser_browse_runtime")
-
-	_poser_status_label = Label.new()
-	_poser_status_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_poser_status_label.text = ""
-	root_box.add_child(_poser_status_label)
-
-	_poser_file_dialog = FileDialog.new()
-	_poser_file_dialog.access = FileDialog.ACCESS_FILESYSTEM
-	_poser_file_dialog.file_selected.connect(_on_poser_file_selected)
-	add_child(_poser_file_dialog)
-
-
-func _build_poser_row(parent: VBoxContainer, label_text: String, browse_callback: StringName) -> LineEdit:
-	var row: HBoxContainer = HBoxContainer.new()
-	row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	parent.add_child(row)
-
-	var label: Label = Label.new()
-	label.text = label_text
-	label.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	label.custom_minimum_size = Vector2(160, 0)
-	row.add_child(label)
-
-	var edit: LineEdit = LineEdit.new()
-	edit.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	row.add_child(edit)
-
-	var browse: Button = Button.new()
-	browse.text = "..."
-	browse.pressed.connect(Callable(self, browse_callback))
-	row.add_child(browse)
-	return edit
-
-
-func _on_tool_poser_cr2_to_gltf() -> void:
-	if not is_instance_valid(_poser_dialog):
-		_build_poser_cr2_dialog()
-	if not is_instance_valid(_poser_dialog):
-		push_warning("Densetsu Suite: Unable to open Poser CR2 dialog.")
-		return
-	if _poser_runtime_edit != null:
-		_poser_runtime_edit.text = poser_cr2_default_runtime_root
-	if _poser_out_edit != null:
-		var out_dir: String = poser_cr2_default_output_dir
-		if out_dir.is_empty():
-			out_dir = "res://temp"
-		_poser_out_edit.text = out_dir.path_join("poser_export.gltf")
-	if _poser_status_label != null:
-		_poser_status_label.text = ""
-	_popup_window_fit_screen(_poser_dialog, Vector2i(760, 280), Vector2i(640, 260))
-
-
-func _open_poser_picker(target: String, file_mode: int, filters: PackedStringArray) -> void:
-	if not is_instance_valid(_poser_file_dialog):
-		_build_poser_cr2_dialog()
-	if not is_instance_valid(_poser_file_dialog):
-		return
-	_poser_pick_target = target
-	_poser_file_dialog.file_mode = file_mode
-	_poser_file_dialog.filters = filters
-	_poser_file_dialog.current_file = ""
-	_poser_file_dialog.popup_centered_ratio(0.7)
-
-
-func _on_poser_browse_cr2() -> void:
-	_open_poser_picker("cr2", FileDialog.FILE_MODE_OPEN_FILE, PackedStringArray(["*.cr2 ; Poser CR2"]))
-
-
-func _on_poser_browse_obj() -> void:
-	_open_poser_picker("obj", FileDialog.FILE_MODE_OPEN_FILE, PackedStringArray(["*.obj ; Wavefront OBJ"]))
-
-
-func _on_poser_browse_out() -> void:
-	_open_poser_picker("out", FileDialog.FILE_MODE_SAVE_FILE, PackedStringArray(["*.gltf ; glTF", "*.glb ; glTF Binary"]))
-
-
-func _on_poser_browse_runtime() -> void:
-	_open_poser_picker("runtime", FileDialog.FILE_MODE_OPEN_DIR, PackedStringArray())
-
-
-func _on_poser_file_selected(path: String) -> void:
-	if _poser_pick_target == "cr2" and _poser_cr2_edit != null:
-		_poser_cr2_edit.text = path
-	elif _poser_pick_target == "obj" and _poser_obj_edit != null:
-		_poser_obj_edit.text = path
-	elif _poser_pick_target == "out" and _poser_out_edit != null:
-		_poser_out_edit.text = path
-	elif _poser_pick_target == "runtime" and _poser_runtime_edit != null:
-		_poser_runtime_edit.text = path
-	_poser_pick_target = ""
-
-
-func _on_poser_dialog_confirmed() -> void:
-	if _poser_status_label == null:
-		return
-	var cr2_path: String = _poser_cr2_edit.text.strip_edges()
-	var out_path: String = _poser_out_edit.text.strip_edges()
-	var runtime_root: String = _poser_runtime_edit.text.strip_edges()
-	var obj_path: String = ""
-	if _poser_obj_edit != null:
-		obj_path = _poser_obj_edit.text.strip_edges()
-
-	if cr2_path.is_empty() or out_path.is_empty():
-		_poser_status_label.text = "CR2 and Output are required."
-		return
-
-	var blender_exe: String = poser_cr2_blender_exe
-	if blender_exe.is_empty():
-		_poser_status_label.text = "Blender executable is not set (poser_cr2_blender_exe)."
-		return
-
-	var script_path: String = poser_cr2_blender_script
-	if script_path.is_empty():
-		_poser_status_label.text = "Blender script path is not set (poser_cr2_blender_script)."
-		return
-
-	if script_path.begins_with("res://"):
-		script_path = ProjectSettings.globalize_path(script_path)
-
-	var args: PackedStringArray = PackedStringArray([
-		"--background",
-		"--python", script_path,
-		"--",
-		"--cr2", cr2_path,
-		"--out", out_path
-	])
-	if not runtime_root.is_empty():
-		args.append("--runtime")
-		args.append(runtime_root)
-	if not obj_path.is_empty():
-		args.append("--obj")
-		args.append(obj_path)
-
-	var pid: int = OS.create_process(blender_exe, args)
-	if pid <= 0:
-		_poser_status_label.text = "Failed to launch Blender process."
-		return
-	_poser_status_label.text = "Launched Blender (PID %d). Output will be written after conversion." % pid
-
-
-func _on_mesh_ref_same_folder_toggled(pressed: bool) -> void:
-	if _mesh_ref_replace_allow_fallback_check == null:
-		return
-	_mesh_ref_replace_allow_fallback_check.disabled = pressed
-	if pressed:
-		_mesh_ref_replace_allow_fallback_check.button_pressed = false
-
-
-func _open_mesh_ref_replace_dialog() -> void:
-	if not is_instance_valid(_mesh_ref_replace_dialog):
-		_build_mesh_ref_replace_dialog()
-	if not is_instance_valid(_mesh_ref_replace_dialog):
-		push_warning("Densetsu Suite: Unable to open OBJ replacement dialog.")
-		return
-	_popup_window_fit_screen(_mesh_ref_replace_dialog, Vector2i(760, 180), Vector2i(560, 150))
-
-
-func _on_mesh_ref_replace_dialog_confirmed() -> void:
-	var dry_run: bool = true
-	var same_folder_only: bool = true
-	var allow_fallback: bool = false
-	var current_folder_only: bool = true
-	if _mesh_ref_replace_dry_run_check != null:
-		dry_run = _mesh_ref_replace_dry_run_check.button_pressed
-	if _mesh_ref_replace_same_folder_check != null:
-		same_folder_only = _mesh_ref_replace_same_folder_check.button_pressed
-	if _mesh_ref_replace_allow_fallback_check != null and not _mesh_ref_replace_allow_fallback_check.disabled:
-		allow_fallback = _mesh_ref_replace_allow_fallback_check.button_pressed
-	if _mesh_ref_replace_scope_current_folder_check != null:
-		current_folder_only = _mesh_ref_replace_scope_current_folder_check.button_pressed
-
-	var candidate_scope_root: String = "res://"
-	if current_folder_only:
-		candidate_scope_root = _get_filesystem_current_folder()
-
-	var target_scope_root: String = "res://"
-	_run_replace_mesh_refs_with_obj_project(
-		dry_run,
-		same_folder_only,
-		allow_fallback,
-		target_scope_root,
-		candidate_scope_root
-	)
-
-
-func _get_filesystem_current_folder() -> String:
-	var iface: EditorInterface = get_editor_interface()
-	if iface == null:
-		return "res://"
-	var dock: Object = iface.get_file_system_dock()
-	if dock == null:
-		return "res://"
-
-	if dock.has_method("get_current_path"):
-		var p_any: Variant = dock.call("get_current_path")
-		var p: String = str(p_any)
-		if not p.is_empty():
-			if p.get_extension().is_empty():
-				return p
-			return p.get_base_dir()
-
-	if dock.has_method("get_selected_path"):
-		var s_any: Variant = dock.call("get_selected_path")
-		var s: String = str(s_any)
-		if not s.is_empty():
-			if s.get_extension().is_empty():
-				return s
-			return s.get_base_dir()
-
-	var selected_paths: PackedStringArray = _get_filesystem_selection()
-	if not selected_paths.is_empty():
-		var first_path: String = selected_paths[0]
-		if first_path.get_extension().is_empty():
-			return first_path
-		return first_path.get_base_dir()
-
-	return "res://"
-
-
-func _show_mesh_ref_replace_report(result: Dictionary) -> void:
-	if not is_instance_valid(_mesh_ref_replace_report_dialog):
-		_build_mesh_ref_replace_report_dialog()
-	if not is_instance_valid(_mesh_ref_replace_report_dialog):
-		return
-
-	var lines: PackedStringArray = PackedStringArray()
-	lines.append("Densetsu OBJ Replacement Report")
-	lines.append("")
-	lines.append("Scope: %s" % str(result.get("scope_root", "res://")))
-	lines.append("OBJ Search Scope: %s" % str(result.get("obj_scope_root", "res://")))
-	lines.append("Dry Run: %s" % str(result.get("dry_run", true)))
-	lines.append("Same Folder Only: %s" % str(result.get("same_folder_only", true)))
-	lines.append("Allow Fallback: %s" % str(result.get("allow_basename_fallback", false)))
-	lines.append("")
-	lines.append("Scanned Files: %d" % int(result.get("scanned", 0)))
-	lines.append("Files With Replacements: %d" % int(result.get("updated_files", 0)))
-	lines.append("Total Replacements: %d" % int(result.get("replacements", 0)))
-	lines.append("Failed Writes/Reads: %d" % int(result.get("failed", 0)))
-	lines.append("")
-	lines.append("OBJ In Scope: %d" % int(result.get("obj_total", 0)))
-	lines.append("OBJ Basenames Used: %d" % int(result.get("obj_used", 0)))
-	lines.append("Duplicate OBJ Basenames: %d" % int(result.get("obj_duplicate_basenames", 0)))
-	lines.append("Mesh TRES_RES In OBJ Scope: %d" % int(result.get("mesh_res_total_in_obj_scope", 0)))
-	lines.append("Mesh TRES_RES With Same-Folder OBJ: %d" % int(result.get("mesh_res_with_same_folder_obj", 0)))
-	lines.append("Mesh TRES_RES Without Same-Folder OBJ: %d" % int(result.get("mesh_res_without_same_folder_obj", 0)))
-	lines.append("")
-	lines.append("Note: replacement counts below are live path references in text resources, not raw pair totals.")
-	lines.append("")
-	lines.append("Same-Folder Matches: %d" % int(result.get("same_folder_matches", 0)))
-	lines.append("Fallback Matches: %d" % int(result.get("fallback_matches", 0)))
-	lines.append("UID Cleanups On Existing OBJ Refs: %d" % int(result.get("uid_cleanups", 0)))
-	lines.append("Conflicts (Missing OBJ): %d" % int(result.get("conflicts_missing_obj", 0)))
-	lines.append("Conflicts (Ambiguous Fallback): %d" % int(result.get("conflicts_ambiguous_fallback", 0)))
-	lines.append("")
-
-	var samples_any: Variant = result.get("conflict_samples", PackedStringArray())
-	if samples_any is PackedStringArray:
-		var samples: PackedStringArray = samples_any
-		if not samples.is_empty():
-			lines.append("Conflict Samples:")
-			for sample in samples:
-				lines.append(" - " + str(sample))
-
-	var report_text: String = "\n".join(lines)
-	if _mesh_ref_replace_report_text != null:
-		_mesh_ref_replace_report_text.text = report_text
-	_popup_window_fit_screen(_mesh_ref_replace_report_dialog, Vector2i(980, 460), Vector2i(680, 280))
-
-
-func _show_tool_log(title_suffix: String, text: String) -> void:
-	if not is_instance_valid(_tool_log_dialog):
-		_build_tool_log_dialog()
-	if not is_instance_valid(_tool_log_dialog):
-		return
-	_tool_log_dialog.title = "Densetsu Tool Log%s" % title_suffix
-	if _tool_log_text != null:
-		_tool_log_text.text = text
-	_popup_window_fit_screen(_tool_log_dialog, Vector2i(1020, 620), Vector2i(700, 340))
-
-
-func _open_move_dialog(paths: PackedStringArray) -> void:
-	if paths.is_empty():
-		push_warning("Densetsu Suite: Select one or more files or folders first.")
-		return
-	if not is_instance_valid(_move_dialog):
-		_build_move_dialog()
-	if not is_instance_valid(_move_dialog):
-		return
-	_move_pending_paths = paths
-	if _move_destination_edit != null:
-		var initial_destination: String = _get_last_move_destination_folder()
-		if initial_destination.is_empty():
-			initial_destination = _get_filesystem_current_folder()
-		_move_destination_edit.text = initial_destination
-	_popup_window_fit_screen(_move_dialog, Vector2i(760, 160), Vector2i(620, 140))
-
-
-func _on_move_browse_pressed() -> void:
-	if not is_instance_valid(_move_folder_dialog):
-		_build_move_dialog()
-	if not is_instance_valid(_move_folder_dialog):
-		return
-	var start_dir: String = _get_filesystem_current_folder()
-	if _move_destination_edit != null and not _move_destination_edit.text.strip_edges().is_empty():
-		start_dir = _move_destination_edit.text.strip_edges()
-	if is_instance_valid(_move_dialog):
-		_move_dialog.hide()
-	# Opening the folder picker in the same frame can keep the hidden confirmation dialog
-	# registered as the exclusive child window. Defer the popup to the next idle frame.
-	call_deferred("_popup_move_folder_dialog", start_dir)
-
-
-func _popup_move_folder_dialog(start_dir: String) -> void:
-	if not is_instance_valid(_move_folder_dialog):
-		return
-	_move_folder_dialog.current_dir = start_dir
-	_popup_window_fit_screen(_move_folder_dialog, Vector2i(960, 620), Vector2i(720, 420))
-
-
-func _on_move_destination_selected(path: String) -> void:
-	if _move_destination_edit != null:
-		_move_destination_edit.text = path
-	_set_last_move_destination_folder(path)
-	if is_instance_valid(_move_dialog):
-		_popup_window_fit_screen(_move_dialog, Vector2i(760, 160), Vector2i(620, 140))
-
-
-func _on_move_destination_canceled() -> void:
-	if is_instance_valid(_move_dialog):
-		_popup_window_fit_screen(_move_dialog, Vector2i(760, 160), Vector2i(620, 140))
 
 
 func _on_move_dialog_confirmed() -> void:
