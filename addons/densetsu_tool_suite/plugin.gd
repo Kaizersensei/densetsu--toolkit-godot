@@ -7,24 +7,15 @@ const TEXTURE_RESIZE_PLUGIN_SCRIPT: String = "res://addons/densetsu_tool_suite/h
 const IMAGE_TRANSFORM_HELPER_SCRIPT: String = "res://addons/densetsu_tool_suite/helpers/image_transform_helper.gd"
 const PIVOT_REASSIGN_HELPER_SCRIPT: String = "res://addons/densetsu_tool_suite/helpers/pivot_reassign_helper.gd"
 const MESH_OBJ_HELPER_SCRIPT: String = "res://addons/densetsu_tool_suite/helpers/mesh_obj_helper.gd"
-const FBX_ANIM_PERSIST_HELPER_SCRIPT: String = "res://addons/densetsu_tool_suite/helpers/fbx_anim_persist_helper.gd"
 const OCCLUSION_PRUNE_HELPER_SCRIPT: String = "res://addons/densetsu_tool_suite/helpers/occlusion_prune_helper.gd"
 const SELECT_SAME_MESH_HELPER_SCRIPT: String = "res://addons/densetsu_tool_suite/helpers/select_same_mesh_helper.gd"
 const SELECT_INTERSECTING_MESH_HELPER_SCRIPT: String = "res://addons/densetsu_tool_suite/helpers/select_intersecting_mesh_helper.gd"
 const MESH_SUBDIVIDE_HELPER_SCRIPT: String = "res://addons/densetsu_tool_suite/helpers/mesh_subdivide_helper.gd"
-const GIT_PULL_MAIN_SCRIPT: String = "res://engine3d/tools/GitPullMain.gd"
-const TEST_RELEASE_REGULAR_SCRIPT: String = "res://engine3d/tools/BuildTestReleaseRegular.gd"
-const TEST_RELEASE_CURRENT_SCENE_SCRIPT: String = "res://engine3d/tools/BuildTestReleaseCurrentScene.gd"
-const BUILD_ACTION_ADVENTURE_LIBRARY_SCRIPT: String = "res://engine3d/tools/BuildActionAdventureLibrary.gd"
-const FORCE_SCENE_MATERIAL_FILTER_SCRIPT: String = "res://engine3d/tools/ForceSceneMaterialFiltering.gd"
-const MAP_OPTIMIZATION_SCRIPT: String = "res://engine3d/tools/MapOptimizationPipeline.gd"
 const DENSETSU_TOOL_MENU_ROOT: String = "Densetsu"
-const DEFAULT_EVENTIDEMILES_REMOTE_URL: String = "ssh://git@gitea.eventidemiles.com:2221/Retraissance/densetsu-dev.git"
 const MOVE_HELPER_METADATA_SECTION: String = "densetsu_tool_suite"
 const MOVE_HELPER_METADATA_KEY_LAST_FOLDER: String = "move_last_folder"
 
 enum ToolMenuId {
-	NEW_MAP = 1,
 	SPREAD_SELECTED_ON_FLOOR,
 	SELECT_SAME_MESH,
 	SELECT_INTERSECTING_MESH,
@@ -49,19 +40,9 @@ enum ToolMenuId {
 	ROTATE_IMAGE_90,
 	ROTATE_IMAGE_180,
 	ROTATE_IMAGE_270,
-	ENABLE_ANIM_IMPORT_PERSISTENCE,
-	ENABLE_ANIM_IMPORT_PERSISTENCE_ALL,
-	REBUILD_ACTION_ADVENTURE_ANIM_LIB,
 	FORCE_THUMBNAIL_REFRESH,
 	FORCE_THUMBNAIL_REFRESH_SELECTED,
-	FORCE_SCENE_FILTER_DRY,
-	FORCE_SCENE_FILTER_RUN,
-	BUILD_TEST_RELEASE_REGULAR,
-	BUILD_TEST_RELEASE_CURRENT_SCENE,
-	OPTIMIZE_EDITING,
-	OPTIMIZE_RUNTIME,
 	MOVE_SELECTED_TO_FOLDER,
-	GIT_PULL_MAIN,
 }
 
 const PIVOT_MODE_CENTER_MASS := 0
@@ -85,12 +66,10 @@ var _texture_resize_helper: Object
 var _image_transform_helper: Object
 var _pivot_reassign_helper: Object
 var _mesh_obj_helper: Object
-var _fbx_anim_persist_helper: Object
 var _occlusion_prune_helper: Object
 var _select_same_mesh_helper: Object
 var _select_intersecting_mesh_helper: Object
 var _mesh_subdivide_helper: Object
-var _new_map_dialog: FileDialog
 var _mesh_ref_replace_dialog: ConfirmationDialog
 var _mesh_ref_replace_scope_current_folder_check: CheckBox
 var _mesh_ref_replace_dry_run_check: CheckBox
@@ -105,83 +84,6 @@ var _move_destination_edit: LineEdit
 var _move_folder_dialog: FileDialog
 var _move_pending_paths: PackedStringArray = PackedStringArray()
 var _filesystem_refresh_pending: bool = false
-
-@export_group("Scene Tools")
-## Template scene used as source when creating a new editable Densetsu map.
-@export_file("*.tscn") var new_map_template_scene: String = "res://engine3d/maps/templates/densetsu_map_template.tscn"
-## Default save directory shown when creating a new map scene.
-@export_dir var new_map_output_dir: String = "res://engine3d/maps"
-## Default file name suggested in the save dialog.
-@export var new_map_default_file: String = "new_densetsu_map.tscn"
-## Occlusion threshold percentage to prune mesh instances (100 = only fully occluded).
-@export_range(0.0, 100.0, 0.1) var prune_occluded_threshold_percent: float = 100.0
-## If true, only selected scene node subtree is scanned when a scene node is selected.
-@export var prune_occluded_use_selection_scope: bool = true
-## If true, reports candidates without deleting them.
-@export var prune_occluded_dry_run: bool = true
-
-@export_group("Git")
-## SSH URL enforced for in-editor git operations.
-@export var git_remote_url: String = DEFAULT_EVENTIDEMILES_REMOTE_URL
-## Branch used by the full in-editor pull action.
-@export var git_main_branch: String = "main"
-## Auto-commit message used before in-editor pulls when the worktree is dirty.
-@export var git_in_editor_commit_message: String = "Godot In-editor commit"
-## Remote Git name (usually origin).
-@export var git_remote_name: String = "origin"
-## Optional override for nested Godot executable path. Leave empty to use the current editor executable.
-@export_file("*") var tool_godot_exe_override: String = ""
-
-@export_group("Test Releases")
-## Root folder where test release builds are generated.
-@export_global_dir var test_release_output_root: String = "D:/Test"
-## If true, publish finished test release zips to Gitea when a token is available.
-@export var test_release_publish_to_gitea: bool = true
-## Gitea base URL used for test release publishing.
-@export var test_release_gitea_base_url: String = "https://gitea.eventidemiles.com"
-## Gitea owner used for test release publishing.
-@export var test_release_gitea_owner: String = "Retraissance"
-## Gitea repository used for test release publishing.
-@export var test_release_gitea_repo: String = "densetsu-dev"
-## Git-ignored token file read before each test release build.
-@export var test_release_gitea_token_file: String = "res://temp/local/gitea_token.txt"
-## Environment variable fallback if the token file is missing.
-@export var test_release_gitea_token_env_var: String = "DENSETSU_GITEA_TOKEN"
-
-@export_group("Map Optimization")
-## Blender executable for UV template export (optional).
-@export_file("*") var map_opt_blender_exe: String = ""
-## Blender UV template script path.
-@export_file("*.py") var map_opt_blender_script: String = "res://engine3d/tools/blender/export_uv_templates.py"
-## Default report output directory.
-@export_dir var map_opt_report_dir: String = "res://artifacts/optimization"
-## Staging directory required for runtime optimization passes.
-@export_dir var map_opt_staging_dir: String = "res://artifacts/opt_stage"
-## Export UV templates during editing optimization.
-@export var map_opt_export_uv_templates_editing: bool = true
-## Export UV templates during runtime optimization.
-@export var map_opt_export_uv_templates_runtime: bool = false
-## UV template format (PNG or SVG).
-@export var map_opt_uv_template_format: String = "PNG"
-## UV template resolution (PNG only).
-@export_range(64, 8192, 32) var map_opt_uv_template_resolution: int = 2048
-## Export UV templates per object (true) or per asset (false).
-@export var map_opt_uv_template_per_object: bool = true
-## Include LOD meshes when exporting UV templates.
-@export var map_opt_uv_template_include_lods: bool = false
-## Destination for UV template artifacts.
-@export_dir var map_opt_uv_template_destination: String = "res://artifacts/uv_templates"
-
-@export_group("Poser CR2 Converter")
-## Blender executable used for CR2->glTF conversion.
-@export_file("*") var poser_cr2_blender_exe: String = "F:/Blender/blender.exe"
-## Blender python script for CR2->glTF conversion.
-@export_file("*.py") var poser_cr2_blender_script: String = "res://scripts/poser_cr2_to_gltf.py"
-## Default runtime root for Poser content.
-@export_dir var poser_cr2_default_runtime_root: String = "F:/poser4/Runtime"
-## Default output directory for generated glTF files.
-@export_dir var poser_cr2_default_output_dir: String = "res://temp"
-
 
 class _DensetsuSuiteContextMenuPlugin:
 	extends EditorContextMenuPlugin
@@ -215,7 +117,6 @@ class _DensetsuSuiteContextMenuPlugin:
 		add_context_menu_item("Densetsu: Move Selected To Folder...", Callable(_owner, "_on_ctx_move_selected_to_folder"))
 		add_context_menu_item("Densetsu: Force Thumbnail Refresh (Selected)", Callable(_owner, "_on_ctx_force_thumbnail_refresh_selected"))
 
-
 func _enter_tree() -> void:
 	_static_pack_helper = _instantiate_plugin(STATIC_PACK_PLUGIN_SCRIPT)
 	_array_extract_helper = _instantiate_plugin(ARRAY_EXTRACT_PLUGIN_SCRIPT)
@@ -227,7 +128,6 @@ func _enter_tree() -> void:
 	_select_same_mesh_helper = _instantiate_plugin(SELECT_SAME_MESH_HELPER_SCRIPT)
 	_select_intersecting_mesh_helper = _instantiate_plugin(SELECT_INTERSECTING_MESH_HELPER_SCRIPT)
 	_mesh_subdivide_helper = _instantiate_plugin(MESH_SUBDIVIDE_HELPER_SCRIPT)
-	_build_new_map_dialog()
 	_build_mesh_ref_replace_dialog()
 	_build_mesh_ref_replace_report_dialog()
 	_build_tool_log_dialog()
@@ -237,14 +137,11 @@ func _enter_tree() -> void:
 	_ctx_plugin = _DensetsuSuiteContextMenuPlugin.new(self)
 	add_context_menu_plugin(EditorContextMenuPlugin.CONTEXT_SLOT_FILESYSTEM, _ctx_plugin)
 
-
 func _exit_tree() -> void:
 	_clear_tool_menus()
 	if _ctx_plugin:
 		remove_context_menu_plugin(_ctx_plugin)
 		_ctx_plugin = null
-	_dispose_node(_new_map_dialog)
-	_new_map_dialog = null
 	_dispose_node(_mesh_ref_replace_dialog)
 	_mesh_ref_replace_dialog = null
 	_dispose_node(_mesh_ref_replace_report_dialog)
@@ -261,7 +158,6 @@ func _exit_tree() -> void:
 	_move_pending_paths = PackedStringArray()
 	_filesystem_refresh_pending = false
 
-
 func _dispose_node(node: Variant) -> void:
 	if not is_instance_valid(node):
 		return
@@ -269,7 +165,6 @@ func _dispose_node(node: Variant) -> void:
 		node.queue_free()
 	else:
 		node.free()
-
 
 func _instantiate_plugin(path: String) -> Object:
 	var script_res: Script = load(path)
@@ -283,7 +178,6 @@ func _instantiate_plugin(path: String) -> Object:
 	if instance == null:
 		push_warning("Densetsu Suite: failed to instantiate helper plugin script: " + path)
 	return instance
-
 
 func _build_tool_menus() -> void:
 	_clear_tool_menus()
@@ -337,7 +231,6 @@ func _build_tool_menus() -> void:
 
 	add_tool_submenu_item(DENSETSU_TOOL_MENU_ROOT, _tool_root_menu)
 
-
 func _create_tool_submenu(label: String) -> PopupMenu:
 	var submenu := PopupMenu.new()
 	submenu.name = StringName("%sMenu" % label)
@@ -346,11 +239,9 @@ func _create_tool_submenu(label: String) -> PopupMenu:
 	_tool_root_menu.add_submenu_item(label, String(submenu.name))
 	return submenu
 
-
 func _register_tool_menu_item(menu: PopupMenu, id: int, label: String, callback: Callable) -> void:
 	menu.add_item(label, id)
 	_tool_action_map[id] = callback
-
 
 func _on_tool_menu_id_pressed(id: int) -> void:
 	var callback_variant: Variant = _tool_action_map.get(id, null)
@@ -361,24 +252,11 @@ func _on_tool_menu_id_pressed(id: int) -> void:
 	if callback.is_valid():
 		callback.call()
 
-
 func _clear_tool_menus() -> void:
 	remove_tool_menu_item(DENSETSU_TOOL_MENU_ROOT)
 	_tool_action_map.clear()
 	_dispose_node(_tool_root_menu)
 	_tool_root_menu = null
-
-
-func _build_new_map_dialog() -> void:
-	_dispose_node(_new_map_dialog)
-	_new_map_dialog = FileDialog.new()
-	_new_map_dialog.title = "Create New Densetsu Map"
-	_new_map_dialog.access = FileDialog.ACCESS_RESOURCES
-	_new_map_dialog.file_mode = FileDialog.FILE_MODE_SAVE_FILE
-	_new_map_dialog.filters = PackedStringArray(["*.tscn ; Godot Scene"])
-	_new_map_dialog.file_selected.connect(_on_new_map_file_selected)
-	add_child(_new_map_dialog)
-
 
 func _build_mesh_ref_replace_dialog() -> void:
 	_dispose_node(_mesh_ref_replace_dialog)
@@ -425,7 +303,6 @@ func _build_mesh_ref_replace_dialog() -> void:
 	note.text = "Target scan is project-wide. Candidate scope limits which OBJ/TRES assets are considered. Missing same-folder OBJ is skipped. Ambiguous fallback is skipped and reported."
 	root_box.add_child(note)
 
-
 func _build_mesh_ref_replace_report_dialog() -> void:
 	_dispose_node(_mesh_ref_replace_report_dialog)
 
@@ -442,7 +319,6 @@ func _build_mesh_ref_replace_report_dialog() -> void:
 	_mesh_ref_replace_report_text.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_mesh_ref_replace_report_dialog.add_child(_mesh_ref_replace_report_text)
 
-
 func _build_tool_log_dialog() -> void:
 	_dispose_node(_tool_log_dialog)
 
@@ -458,7 +334,6 @@ func _build_tool_log_dialog() -> void:
 	_tool_log_text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_tool_log_text.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_tool_log_dialog.add_child(_tool_log_text)
-
 
 func _build_move_dialog() -> void:
 	_dispose_node(_move_dialog)
@@ -506,13 +381,11 @@ func _build_move_dialog() -> void:
 	_move_folder_dialog.canceled.connect(_on_move_destination_canceled)
 	add_child(_move_folder_dialog)
 
-
 func _on_move_dialog_confirmed() -> void:
 	var destination_dir: String = ""
 	if _move_destination_edit != null:
 		destination_dir = _move_destination_edit.text.strip_edges()
 	_run_move_selected_to_folder(_move_pending_paths, destination_dir)
-
 
 func _run_move_selected_to_folder(paths: PackedStringArray, destination_dir: String) -> void:
 	if paths.is_empty():
@@ -571,7 +444,6 @@ func _run_move_selected_to_folder(paths: PackedStringArray, destination_dir: Str
 	if failed > 0:
 		push_warning(summary + "\n" + "\n".join(fail_lines))
 
-
 func _expand_move_paths_with_obj_companions(paths: PackedStringArray) -> PackedStringArray:
 	var expanded: PackedStringArray = PackedStringArray()
 	var seen: Dictionary = {}
@@ -591,7 +463,6 @@ func _expand_move_paths_with_obj_companions(paths: PackedStringArray) -> PackedS
 			expanded.append(companion_path)
 	return expanded
 
-
 func _get_obj_companion_mtl_paths(obj_path: String) -> PackedStringArray:
 	var companions: PackedStringArray = PackedStringArray()
 	for raw_ref: String in _get_obj_mtllib_refs(obj_path):
@@ -602,7 +473,6 @@ func _get_obj_companion_mtl_paths(obj_path: String) -> PackedStringArray:
 			continue
 		companions.append(source_path)
 	return companions
-
 
 func _get_obj_mtllib_refs(obj_path: String) -> PackedStringArray:
 	var refs: PackedStringArray = PackedStringArray()
@@ -615,10 +485,8 @@ func _get_obj_mtllib_refs(obj_path: String) -> PackedStringArray:
 			refs.append(line.substr(7).strip_edges())
 	return refs
 
-
 func _decode_obj_mtllib_ref(raw_ref: String) -> String:
 	return raw_ref.strip_edges().replace("\\ ", " ").replace("\\", "/")
-
 
 func _resolve_obj_mtllib_source_path(obj_path: String, raw_ref: String) -> String:
 	var decoded_ref: String = _decode_obj_mtllib_ref(raw_ref)
@@ -632,7 +500,6 @@ func _resolve_obj_mtllib_source_path(obj_path: String, raw_ref: String) -> Strin
 			return localized
 		return ""
 	return obj_path.get_base_dir().path_join(decoded_ref)
-
 
 func _rewrite_obj_mtllibs_to_local(obj_path: String) -> bool:
 	var source_text: String = FileAccess.get_file_as_string(obj_path)
@@ -659,7 +526,6 @@ func _rewrite_obj_mtllibs_to_local(obj_path: String) -> bool:
 	file.store_string("\n".join(lines))
 	return true
 
-
 func _get_last_move_destination_folder() -> String:
 	var editor_settings: EditorSettings = EditorInterface.get_editor_settings()
 	if editor_settings == null:
@@ -674,7 +540,6 @@ func _get_last_move_destination_folder() -> String:
 		return path
 	return ""
 
-
 func _set_last_move_destination_folder(path: String) -> void:
 	var trimmed: String = path.strip_edges()
 	if not trimmed.begins_with("res://"):
@@ -688,14 +553,12 @@ func _set_last_move_destination_folder(path: String) -> void:
 		trimmed
 	)
 
-
 func _popup_window_fit_screen(win: Window, preferred_size: Vector2i, min_size: Vector2i) -> void:
 	if win == null:
 		return
 	win.popup()
 	_clamp_window_to_usable_screen(win, preferred_size, min_size)
 	call_deferred("_clamp_window_to_usable_screen", win, preferred_size, min_size)
-
 
 func _clamp_window_to_usable_screen(win: Window, preferred_size: Vector2i, min_size: Vector2i) -> void:
 	if not is_instance_valid(win):
@@ -728,7 +591,6 @@ func _clamp_window_to_usable_screen(win: Window, preferred_size: Vector2i, min_s
 	pos.y = clampi(pos.y, min_y, max_y)
 	win.position = pos
 
-
 func _get_editor_dialog_bounds_rect() -> Rect2i:
 	var screen: int = DisplayServer.window_get_current_screen()
 	var screen_usable: Rect2i = DisplayServer.screen_get_usable_rect(screen)
@@ -749,7 +611,6 @@ func _get_editor_dialog_bounds_rect() -> Rect2i:
 						return clipped
 					return screen_usable
 	return screen_usable
-
 
 func _get_filesystem_selection() -> PackedStringArray:
 	var out: PackedStringArray = PackedStringArray()
@@ -792,7 +653,6 @@ func _get_filesystem_selection() -> PackedStringArray:
 			out.append(str(sel_file))
 	return out
 
-
 func _get_current_edited_scene_path() -> String:
 	var iface: EditorInterface = get_editor_interface()
 	if iface == null:
@@ -815,7 +675,6 @@ func _get_current_edited_scene_path() -> String:
 					return sp
 	return ""
 
-
 func _run_static_pack(paths: PackedStringArray) -> void:
 	if _static_pack_helper == null:
 		push_warning("Densetsu Suite: Static Pack helper unavailable.")
@@ -826,13 +685,11 @@ func _run_static_pack(paths: PackedStringArray) -> void:
 	else:
 		push_warning("Densetsu Suite: Static Pack helper missing _pack_paths.")
 
-
 func _request_filesystem_refresh() -> void:
 	if _filesystem_refresh_pending:
 		return
 	_filesystem_refresh_pending = true
 	call_deferred("_flush_filesystem_refresh")
-
 
 func _flush_filesystem_refresh() -> void:
 	_filesystem_refresh_pending = false
@@ -847,7 +704,6 @@ func _flush_filesystem_refresh() -> void:
 	if fs.has_method("scan"):
 		fs.scan.call_deferred()
 
-
 func _run_array_extract(paths: PackedStringArray, mode: int, output_mode: int) -> void:
 	if _array_extract_helper == null:
 		push_warning("Densetsu Suite: ArrayMesh Extract helper unavailable.")
@@ -857,7 +713,6 @@ func _run_array_extract(paths: PackedStringArray, mode: int, output_mode: int) -
 	else:
 		push_warning("Densetsu Suite: ArrayMesh Extract helper missing _extract_paths.")
 
-
 func _run_texture_resize(paths: PackedStringArray, mode: int) -> void:
 	if _texture_resize_helper == null:
 		push_warning("Densetsu Suite: Texture Resize helper unavailable.")
@@ -866,7 +721,6 @@ func _run_texture_resize(paths: PackedStringArray, mode: int) -> void:
 		_texture_resize_helper.call("_resize_paths", paths, mode)
 	else:
 		push_warning("Densetsu Suite: Texture Resize helper missing _resize_paths.")
-
 
 func _run_image_transform(paths: PackedStringArray, mode: int) -> void:
 	if _image_transform_helper == null:
@@ -883,7 +737,6 @@ func _run_image_transform(paths: PackedStringArray, mode: int) -> void:
 	var skipped: int = int(result.get("skipped", 0))
 	print("Densetsu Suite: Image transform converted=%d failed=%d skipped=%d" % [converted, failed, skipped])
 
-
 func _run_pivot_reassign(paths: PackedStringArray, mode: int) -> void:
 	if _pivot_reassign_helper == null:
 		push_warning("Densetsu Suite: Pivot Reassign helper unavailable.")
@@ -892,7 +745,6 @@ func _run_pivot_reassign(paths: PackedStringArray, mode: int) -> void:
 		_pivot_reassign_helper.call("reassign_pivot_paths", paths, mode, get_editor_interface())
 	else:
 		push_warning("Densetsu Suite: Pivot Reassign helper missing reassign_pivot_paths.")
-
 
 func _run_convert_mesh_res_to_obj(paths: PackedStringArray) -> void:
 	if not _ensure_mesh_obj_helper():
@@ -906,7 +758,6 @@ func _run_convert_mesh_res_to_obj(paths: PackedStringArray) -> void:
 	var failed: int = int(result.get("failed", 0))
 	var skipped: int = int(result.get("skipped", 0))
 	print("Densetsu Suite: Mesh TRES/RES -> OBJ converted=%d failed=%d skipped=%d" % [converted, failed, skipped])
-
 
 func _run_subdivide_mesh_to_obj(paths: PackedStringArray) -> void:
 	if _mesh_subdivide_helper == null:
@@ -922,29 +773,6 @@ func _run_subdivide_mesh_to_obj(paths: PackedStringArray) -> void:
 	var failed: int = int(result.get("failed", 0))
 	var skipped: int = int(result.get("skipped", 0))
 	print("Densetsu Suite: Mesh Subdivide -> OBJ converted=%d failed=%d skipped=%d" % [converted, failed, skipped])
-
-
-func _run_enable_anim_import_persistence(paths: PackedStringArray) -> void:
-	if not _ensure_fbx_anim_persist_helper():
-		push_warning("Densetsu Suite: Animation persist helper unavailable.")
-		return
-	if not _fbx_anim_persist_helper.has_method("configure_persistent_animation_import_paths"):
-		push_warning("Densetsu Suite: Animation persist helper missing configure_persistent_animation_import_paths.")
-		return
-	var result: Dictionary = _fbx_anim_persist_helper.call("configure_persistent_animation_import_paths", paths, get_editor_interface())
-	var scanned: int = int(result.get("scanned", 0))
-	var updated: int = int(result.get("updated", 0))
-	var unchanged: int = int(result.get("unchanged", 0))
-	var failed: int = int(result.get("failed", 0))
-	print("Densetsu Suite: Animation import persistence scanned=%d updated=%d unchanged=%d failed=%d" % [scanned, updated, unchanged, failed])
-	if failed > 0:
-		var failures_any: Variant = result.get("failures", PackedStringArray())
-		if failures_any is PackedStringArray:
-			var failures: PackedStringArray = failures_any as PackedStringArray
-			var preview_count: int = min(8, failures.size())
-			for i in preview_count:
-				push_warning("Densetsu Suite: " + failures[i])
-
 
 func _run_prune_occluded_mesh_instances() -> void:
 	if _occlusion_prune_helper == null:
@@ -971,7 +799,6 @@ func _run_prune_occluded_mesh_instances() -> void:
 	var retained: int = int(result.get("retained", 0))
 	print("Densetsu Suite: Occlusion prune scope=%s scanned=%d removed=%d retained=%d" % [scope_path, scanned, removed, retained])
 
-
 func _run_select_same_mesh_nodes() -> void:
 	if _select_same_mesh_helper == null:
 		_select_same_mesh_helper = _instantiate_plugin(SELECT_SAME_MESH_HELPER_SCRIPT)
@@ -989,7 +816,6 @@ func _run_select_same_mesh_nodes() -> void:
 	var skipped: int = int(result.get("skipped", 0))
 	print("Densetsu Suite: Select same mesh selected=%d skipped=%d" % [selected, skipped])
 
-
 func _run_select_intersecting_mesh_nodes() -> void:
 	if _select_intersecting_mesh_helper == null:
 		_select_intersecting_mesh_helper = _instantiate_plugin(SELECT_INTERSECTING_MESH_HELPER_SCRIPT)
@@ -1006,7 +832,6 @@ func _run_select_intersecting_mesh_nodes() -> void:
 	var selected: int = int(result.get("selected", 0))
 	var skipped: int = int(result.get("skipped", 0))
 	print("Densetsu Suite: Select intersecting mesh selected=%d skipped=%d" % [selected, skipped])
-
 
 func _run_editor_script(script_path: String, action_name: String) -> bool:
 	var script_res: Script = load(script_path)
@@ -1028,16 +853,6 @@ func _run_editor_script(script_path: String, action_name: String) -> bool:
 	print("Densetsu Suite: Completed " + action_name + ".")
 	return true
 
-
-func _run_rebuild_action_adventure_animation_library() -> void:
-	var ok: bool = _run_editor_script(BUILD_ACTION_ADVENTURE_LIBRARY_SCRIPT, "ActionAdventure animation library rebuild")
-	if not ok:
-		return
-	var report_path: String = "res://assets/characters/biped/anim/BipedAnimations_ActionAdventure_report.txt"
-	if FileAccess.file_exists(report_path):
-		print("Densetsu Suite: Report written: " + report_path)
-
-
 func _run_replace_mesh_refs_with_obj(paths: PackedStringArray) -> void:
 	if not _ensure_mesh_obj_helper():
 		push_warning("Densetsu Suite: Mesh OBJ helper unavailable.")
@@ -1053,7 +868,6 @@ func _run_replace_mesh_refs_with_obj(paths: PackedStringArray) -> void:
 		var err_text: String = str(result.get("error", "No matching scene references updated."))
 		push_warning("Densetsu Suite: " + err_text)
 	print("Densetsu Suite: Scene mesh refs replaced scenes=%d refs=%d failed=%d" % [updated_scenes, replacements, failed])
-
 
 func _run_replace_mesh_refs_with_obj_project(
 	dry_run: bool = true,
@@ -1112,20 +926,11 @@ func _run_replace_mesh_refs_with_obj_project(
 	)
 	_show_mesh_ref_replace_report(result)
 
-
 func _ensure_mesh_obj_helper() -> bool:
 	if _mesh_obj_helper != null:
 		return true
 	_mesh_obj_helper = _instantiate_plugin(MESH_OBJ_HELPER_SCRIPT)
 	return _mesh_obj_helper != null
-
-
-func _ensure_fbx_anim_persist_helper() -> bool:
-	if _fbx_anim_persist_helper != null:
-		return true
-	_fbx_anim_persist_helper = _instantiate_plugin(FBX_ANIM_PERSIST_HELPER_SCRIPT)
-	return _fbx_anim_persist_helper != null
-
 
 func _run_force_thumbnail_refresh() -> void:
 	var removed: int = 0
@@ -1135,7 +940,6 @@ func _run_force_thumbnail_refresh() -> void:
 	var iface: EditorInterface = get_editor_interface()
 	_request_filesystem_refresh()
 	print("Densetsu Suite: forced thumbnail refresh, removed cache files=", removed)
-
 
 func _run_force_thumbnail_refresh_selected(paths: PackedStringArray) -> void:
 	var files: PackedStringArray = _expand_selected_resource_paths(paths)
@@ -1169,357 +973,6 @@ func _run_force_thumbnail_refresh_selected(paths: PackedStringArray) -> void:
 			fs.update_file(p)
 	print("Densetsu Suite: selective thumbnail refresh files=%d removed_cache=%d" % [files.size(), removed])
 
-
-func _run_force_scene_material_filtering_current_scene(dry_run: bool) -> void:
-	if not FileAccess.file_exists(FORCE_SCENE_MATERIAL_FILTER_SCRIPT):
-		push_warning("Densetsu Suite: Force scene material filtering script not found: " + FORCE_SCENE_MATERIAL_FILTER_SCRIPT)
-		return
-	var scene_path: String = _get_current_edited_scene_path()
-	if scene_path.is_empty():
-		push_warning("Densetsu Suite: Current scene must be saved before running material filtering.")
-		return
-	var godot_exe: String = _resolve_godot_cli_executable(OS.get_executable_path())
-	if godot_exe.is_empty():
-		push_warning("Densetsu Suite: Could not resolve Godot executable path.")
-		return
-	var project_root_abs: String = ProjectSettings.globalize_path("res://")
-	var report_path: String = "res://temp/force_scene_material_filtering_%s.txt" % scene_path.get_file().get_basename()
-	var args: PackedStringArray = PackedStringArray([
-		"--headless",
-		"--path", project_root_abs,
-		"-s", FORCE_SCENE_MATERIAL_FILTER_SCRIPT,
-		"--",
-		"--scene=%s" % scene_path,
-		"--mode=linear_mipmap_aniso",
-		"--report=%s" % report_path,
-	])
-	if dry_run:
-		args.append("--dry-run")
-	var output: Array = []
-	var mode_label: String = "dry-run" if dry_run else "apply"
-	print("Densetsu Suite: Running scene material filtering (%s) on %s..." % [mode_label, scene_path])
-	var code: int = OS.execute(godot_exe, args, output, true)
-	if not output.is_empty():
-		for chunk in output:
-			print(str(chunk))
-	if code != 0:
-		push_error("Densetsu Suite: scene material filtering failed (exit %d)." % code)
-		return
-	print("Densetsu Suite: scene material filtering completed (%s). Report: %s" % [mode_label, report_path])
-
-
-func _run_map_optimization(mode: String) -> void:
-	if not FileAccess.file_exists(MAP_OPTIMIZATION_SCRIPT):
-		push_warning("Densetsu Suite: Map optimization script not found: " + MAP_OPTIMIZATION_SCRIPT)
-		return
-	var scene_path: String = _get_current_edited_scene_path()
-	if scene_path.is_empty():
-		push_warning("Densetsu Suite: Current scene must be saved before running map optimization.")
-		return
-	var godot_exe: String = _resolve_godot_cli_executable(OS.get_executable_path())
-	if godot_exe.is_empty():
-		push_warning("Densetsu Suite: Could not resolve Godot executable path.")
-		return
-
-	var report_dir: String = map_opt_report_dir.strip_edges()
-	if report_dir.is_empty():
-		report_dir = "res://artifacts/optimization"
-	var report_path: String = report_dir.path_join("map_optimization_%s_%s.json" % [scene_path.get_file().get_basename(), mode])
-
-	var project_root_abs: String = ProjectSettings.globalize_path("res://")
-	var args: PackedStringArray = PackedStringArray([
-		"--headless",
-		"--path", project_root_abs,
-		"-s", MAP_OPTIMIZATION_SCRIPT,
-		"--",
-		"--mode=%s" % mode,
-		"--scene=%s" % scene_path,
-		"--report=%s" % report_path,
-		"--uv-template-format=%s" % map_opt_uv_template_format.strip_edges(),
-		"--uv-template-resolution=%d" % map_opt_uv_template_resolution,
-	])
-
-	if map_opt_uv_template_per_object:
-		args.append("--uv-template-per-object")
-	else:
-		args.append("--uv-template-per-asset")
-
-	if map_opt_uv_template_include_lods:
-		args.append("--uv-template-include-lods")
-	else:
-		args.append("--uv-template-exclude-lods")
-
-	var uv_dest: String = map_opt_uv_template_destination.strip_edges()
-	if not uv_dest.is_empty():
-		args.append("--uv-template-destination=%s" % uv_dest)
-
-	var export_uv: bool = map_opt_export_uv_templates_editing if mode == "editing" else map_opt_export_uv_templates_runtime
-	if export_uv:
-		args.append("--export-uv-templates")
-	else:
-		args.append("--no-export-uv-templates")
-
-	var staging_dir: String = map_opt_staging_dir.strip_edges()
-	if not staging_dir.is_empty():
-		args.append("--staging-dir=%s" % staging_dir)
-
-	if not map_opt_blender_exe.strip_edges().is_empty():
-		args.append("--blender=%s" % map_opt_blender_exe.strip_edges())
-	if not map_opt_blender_script.strip_edges().is_empty():
-		args.append("--blender-script=%s" % map_opt_blender_script.strip_edges())
-
-	var output: Array = []
-	print("Densetsu Suite: Running map optimization (%s) for %s..." % [mode, scene_path])
-	var code: int = OS.execute(godot_exe, args, output, true)
-	if not output.is_empty():
-		for chunk in output:
-			print(str(chunk))
-	if code != 0:
-		push_error("Densetsu Suite: map optimization failed (exit %d)." % code)
-		return
-	print("Densetsu Suite: map optimization completed (%s). Report: %s" % [mode, report_path])
-
-
-func _run_test_release_regular() -> void:
-	if not ResourceLoader.exists(TEST_RELEASE_REGULAR_SCRIPT, "Script") and not FileAccess.file_exists(ProjectSettings.globalize_path(TEST_RELEASE_REGULAR_SCRIPT)):
-		push_warning("Densetsu Suite: Test release regular script not found: " + TEST_RELEASE_REGULAR_SCRIPT)
-		return
-	var godot_exe: String = tool_godot_exe_override.strip_edges()
-	if godot_exe.is_empty():
-		godot_exe = _resolve_godot_cli_executable(OS.get_executable_path())
-	if godot_exe.is_empty():
-		push_warning("Densetsu Suite: Could not resolve Godot executable path.")
-		return
-	var project_root_abs: String = ProjectSettings.globalize_path("res://")
-	var args: PackedStringArray = PackedStringArray([
-		"--headless",
-		"--path", project_root_abs,
-		"-s", TEST_RELEASE_REGULAR_SCRIPT,
-		"--",
-		"--use-runtime-manifest",
-		'--out="%s"' % test_release_output_root.strip_edges(),
-	])
-	if not tool_godot_exe_override.strip_edges().is_empty():
-		args.append('--godot-exe="%s"' % tool_godot_exe_override.strip_edges())
-	var publish_requested: bool = false
-	if test_release_publish_to_gitea:
-		var token_value: String = _get_test_release_publish_token()
-		if token_value.is_empty():
-			_warn_missing_test_release_token()
-		else:
-			publish_requested = true
-			args.append("--publish")
-			args.append('--gitea-base-url="%s"' % test_release_gitea_base_url.strip_edges())
-			args.append('--gitea-owner="%s"' % test_release_gitea_owner.strip_edges())
-			args.append('--gitea-repo="%s"' % test_release_gitea_repo.strip_edges())
-			args.append('--gitea-token-file="%s"' % test_release_gitea_token_file.strip_edges())
-			args.append('--gitea-token-env="%s"' % test_release_gitea_token_env_var.strip_edges())
-
-	var output: Array = []
-	print("Densetsu Suite: Preflighting regular test release...")
-	var preflight_args: PackedStringArray = args.duplicate()
-	preflight_args.append("--preflight-only")
-	var preflight_code: int = OS.execute(godot_exe, preflight_args, output, true)
-	var log_text: String = ""
-	log_text += "Mode: Build Test Release (Regular)\n"
-	log_text += "Publish Requested: %s\n" % str(publish_requested)
-	log_text += "Preflight Command: %s %s\n\n" % [godot_exe, " ".join(preflight_args)]
-	log_text += "Preflight Exit Code: %d\n\n" % preflight_code
-	if not output.is_empty():
-		for chunk in output:
-			log_text += str(chunk)
-			if not str(chunk).ends_with("\n"):
-				log_text += "\n"
-	else:
-		log_text += "(No output captured)\n"
-
-	if preflight_code != 0:
-		push_error("Densetsu Suite: Regular test release preflight failed (exit %d). See log dialog." % preflight_code)
-		_show_tool_log(" - Regular Test Release Failed", log_text)
-		return
-
-	output.clear()
-	print("Densetsu Suite: Building regular test release...")
-	var code: int = OS.execute(godot_exe, args, output, true)
-	log_text += "\nBuild Command: %s %s\n\n" % [godot_exe, " ".join(args)]
-	log_text += "Build Exit Code: %d\n\n" % code
-	if not output.is_empty():
-		for chunk in output:
-			log_text += str(chunk)
-			if not str(chunk).ends_with("\n"):
-				log_text += "\n"
-	else:
-		log_text += "(No output captured)\n"
-
-	if code != 0:
-		push_error("Densetsu Suite: Regular test release build failed (exit %d). See log dialog." % code)
-		_show_tool_log(" - Regular Test Release Failed", log_text)
-		return
-
-	print("Densetsu Suite: Regular test release build completed successfully.")
-	_show_tool_log(" - Regular Test Release Built", log_text)
-
-
-func _run_test_release_current_scene() -> void:
-	if not ResourceLoader.exists(TEST_RELEASE_CURRENT_SCENE_SCRIPT, "Script") and not FileAccess.file_exists(ProjectSettings.globalize_path(TEST_RELEASE_CURRENT_SCENE_SCRIPT)):
-		push_warning("Densetsu Suite: Test release current-scene script not found: " + TEST_RELEASE_CURRENT_SCENE_SCRIPT)
-		return
-	var current_scene: String = _get_current_edited_scene_path().strip_edges()
-	if current_scene.is_empty():
-		push_warning("Densetsu Suite: No current edited scene found for current-scene test release.")
-		return
-	var godot_exe: String = tool_godot_exe_override.strip_edges()
-	if godot_exe.is_empty():
-		godot_exe = _resolve_godot_cli_executable(OS.get_executable_path())
-	if godot_exe.is_empty():
-		push_warning("Densetsu Suite: Could not resolve Godot executable path.")
-		return
-	var project_root_abs: String = ProjectSettings.globalize_path("res://")
-	var args: PackedStringArray = PackedStringArray([
-		"--headless",
-		"--path", project_root_abs,
-		"-s", TEST_RELEASE_CURRENT_SCENE_SCRIPT,
-		"--",
-		"--use-runtime-manifest",
-		'--out="%s"' % test_release_output_root.strip_edges().path_join("current_scene"),
-		'--current-scene="%s"' % current_scene,
-	])
-	if not tool_godot_exe_override.strip_edges().is_empty():
-		args.append('--godot-exe="%s"' % tool_godot_exe_override.strip_edges())
-	var publish_requested: bool = false
-	if test_release_publish_to_gitea:
-		var token_value: String = _get_test_release_publish_token()
-		if token_value.is_empty():
-			_warn_missing_test_release_token()
-		else:
-			publish_requested = true
-			args.append("--publish")
-			args.append('--gitea-base-url="%s"' % test_release_gitea_base_url.strip_edges())
-			args.append('--gitea-owner="%s"' % test_release_gitea_owner.strip_edges())
-			args.append('--gitea-repo="%s"' % test_release_gitea_repo.strip_edges())
-			args.append('--gitea-token-file="%s"' % test_release_gitea_token_file.strip_edges())
-			args.append('--gitea-token-env="%s"' % test_release_gitea_token_env_var.strip_edges())
-
-	var output: Array = []
-	print("Densetsu Suite: Preflighting current-scene test release...")
-	var preflight_args: PackedStringArray = args.duplicate()
-	preflight_args.append("--preflight-only")
-	var preflight_code: int = OS.execute(godot_exe, preflight_args, output, true)
-	var log_text: String = ""
-	log_text += "Mode: Build Test Release (Current Scene)\n"
-	log_text += "Current Scene: %s\n" % current_scene
-	log_text += "Publish Requested: %s\n" % str(publish_requested)
-	log_text += "Preflight Command: %s %s\n\n" % [godot_exe, " ".join(preflight_args)]
-	log_text += "Preflight Exit Code: %d\n\n" % preflight_code
-	if not output.is_empty():
-		for chunk in output:
-			log_text += str(chunk)
-			if not str(chunk).ends_with("\n"):
-				log_text += "\n"
-	else:
-		log_text += "(No output captured)\n"
-
-	if preflight_code != 0:
-		push_error("Densetsu Suite: Current-scene test release preflight failed (exit %d). See log dialog." % preflight_code)
-		_show_tool_log(" - Current Scene Test Release Failed", log_text)
-		return
-
-	output.clear()
-	print("Densetsu Suite: Building current-scene test release...")
-	var code: int = OS.execute(godot_exe, args, output, true)
-	log_text += "\nBuild Command: %s %s\n\n" % [godot_exe, " ".join(args)]
-	log_text += "Build Exit Code: %d\n\n" % code
-	if not output.is_empty():
-		for chunk in output:
-			log_text += str(chunk)
-			if not str(chunk).ends_with("\n"):
-				log_text += "\n"
-	else:
-		log_text += "(No output captured)\n"
-
-	if code != 0:
-		push_error("Densetsu Suite: Current-scene test release build failed (exit %d). See log dialog." % code)
-		_show_tool_log(" - Current Scene Test Release Failed", log_text)
-		return
-
-	print("Densetsu Suite: Current-scene test release build completed successfully.")
-	_show_tool_log(" - Current Scene Test Release Built", log_text)
-
-
-func _get_test_release_publish_token() -> String:
-	var token_file_res: String = test_release_gitea_token_file.strip_edges()
-	if not token_file_res.is_empty():
-		var token_file_abs: String = ProjectSettings.globalize_path(token_file_res)
-		if FileAccess.file_exists(token_file_abs):
-			return FileAccess.get_file_as_string(token_file_abs).strip_edges()
-	var token_env: String = test_release_gitea_token_env_var.strip_edges()
-	if token_env.is_empty():
-		token_env = "DENSETSU_GITEA_TOKEN"
-	return OS.get_environment(token_env).strip_edges()
-
-
-func _warn_missing_test_release_token() -> void:
-	var token_file_res: String = test_release_gitea_token_file.strip_edges()
-	var token_file_abs: String = ProjectSettings.globalize_path(token_file_res) if not token_file_res.is_empty() else ""
-	var token_dir_abs: String = token_file_abs.get_base_dir() if not token_file_abs.is_empty() else ""
-	if not token_dir_abs.is_empty():
-		DirAccess.make_dir_recursive_absolute(token_dir_abs)
-	var text: String = ""
-	text += "Test release publish token not found.\n\n"
-	text += "Create this git-ignored file and place only the token value inside:\n"
-	text += "%s\n\n" % token_file_res
-	text += "Current build will continue without publishing.\n"
-	text += "Environment fallback: %s" % test_release_gitea_token_env_var.strip_edges()
-	_show_tool_log(" - Missing Gitea Token", text)
-
-
-func _run_git_pull_main() -> void:
-	if not FileAccess.file_exists(GIT_PULL_MAIN_SCRIPT):
-		push_warning("Densetsu Suite: Git pull script not found: " + GIT_PULL_MAIN_SCRIPT)
-		return
-	var godot_exe: String = tool_godot_exe_override.strip_edges()
-	if godot_exe.is_empty():
-		godot_exe = _resolve_godot_cli_executable(OS.get_executable_path())
-	if godot_exe.is_empty():
-		push_warning("Densetsu Suite: Could not resolve Godot executable path.")
-		return
-
-	var project_root_abs: String = ProjectSettings.globalize_path("res://")
-	var args: PackedStringArray = PackedStringArray([
-		"--headless",
-		"--path", project_root_abs,
-		"-s", GIT_PULL_MAIN_SCRIPT,
-		"--",
-		"--remote=%s" % git_remote_name.strip_edges(),
-		"--remote-url=%s" % git_remote_url.strip_edges(),
-		"--branch=%s" % git_main_branch.strip_edges(),
-		"--commit-message=%s" % git_in_editor_commit_message.strip_edges(),
-	])
-
-	var output: Array = []
-	print("Densetsu Suite: Running full pull to %s..." % git_main_branch.strip_edges())
-	var code: int = OS.execute(godot_exe, args, output, true)
-	var log_text: String = ""
-	log_text += "Mode: Full Pull to %s\n" % git_main_branch.strip_edges()
-	log_text += "Command: %s %s\n\n" % [godot_exe, " ".join(args)]
-	log_text += "Exit Code: %d\n\n" % code
-	if not output.is_empty():
-		for chunk in output:
-			log_text += str(chunk)
-			if not str(chunk).ends_with("\n"):
-				log_text += "\n"
-	else:
-		log_text += "(No output captured)\n"
-
-	if code != 0:
-		push_error("Densetsu Suite: Full pull failed (exit %d). See log dialog." % code)
-		_show_tool_log(" - Git Pull Failed", log_text)
-		return
-
-	print("Densetsu Suite: Full pull completed successfully.")
-	_show_tool_log(" - Git Pull Success", log_text)
-
-
 func _resolve_godot_cli_executable(preferred_path: String) -> String:
 	var exe_path: String = preferred_path.strip_edges()
 	if exe_path.is_empty():
@@ -1534,151 +987,74 @@ func _resolve_godot_cli_executable(preferred_path: String) -> String:
 			return sibling_console
 	return exe_path
 
-
 func _on_tool_static_pack() -> void:
 	_run_static_pack(_get_filesystem_selection())
-
 
 func _on_tool_move_selected_to_folder() -> void:
 	_open_move_dialog(_get_filesystem_selection())
 
-
 func _on_tool_extract_mesh_per_file() -> void:
 	_run_array_extract(_get_filesystem_selection(), 0, 0)
-
 
 func _on_tool_extract_mesh_common() -> void:
 	_run_array_extract(_get_filesystem_selection(), 0, 1)
 
-
 func _on_tool_extract_material_per_file() -> void:
 	_run_array_extract(_get_filesystem_selection(), 1, 0)
-
 
 func _on_tool_extract_material_common() -> void:
 	_run_array_extract(_get_filesystem_selection(), 1, 1)
 
-
 func _on_tool_extract_combined_per_file() -> void:
 	_run_array_extract(_get_filesystem_selection(), 2, 0)
-
 
 func _on_tool_extract_combined_common() -> void:
 	_run_array_extract(_get_filesystem_selection(), 2, 1)
 
-
 func _on_tool_resize_overwrite() -> void:
 	_run_texture_resize(_get_filesystem_selection(), 0)
-
 
 func _on_tool_resize_copy() -> void:
 	_run_texture_resize(_get_filesystem_selection(), 1)
 
-
 func _on_tool_flip_image_h() -> void:
 	_run_image_transform(_get_filesystem_selection(), IMAGE_TRANSFORM_FLIP_H)
-
 
 func _on_tool_flip_image_v() -> void:
 	_run_image_transform(_get_filesystem_selection(), IMAGE_TRANSFORM_FLIP_V)
 
-
 func _on_tool_rotate_image_90() -> void:
 	_run_image_transform(_get_filesystem_selection(), IMAGE_TRANSFORM_ROT_90)
-
 
 func _on_tool_rotate_image_180() -> void:
 	_run_image_transform(_get_filesystem_selection(), IMAGE_TRANSFORM_ROT_180)
 
-
 func _on_tool_rotate_image_270() -> void:
 	_run_image_transform(_get_filesystem_selection(), IMAGE_TRANSFORM_ROT_270)
-
 
 func _on_tool_pivot_center_mass() -> void:
 	_run_pivot_reassign(_get_filesystem_selection(), PIVOT_MODE_CENTER_MASS)
 
-
 func _on_tool_pivot_center_bottom() -> void:
 	_run_pivot_reassign(_get_filesystem_selection(), PIVOT_MODE_CENTER_BOTTOM)
-
 
 func _on_tool_convert_mesh_res_to_obj() -> void:
 	_run_convert_mesh_res_to_obj(_get_filesystem_selection())
 
-
 func _on_tool_subdivide_mesh_to_obj() -> void:
 	_run_subdivide_mesh_to_obj(_get_filesystem_selection())
-
-
-func _on_tool_enable_anim_import_persistence() -> void:
-	_run_enable_anim_import_persistence(_get_filesystem_selection())
-
-
-func _on_tool_enable_anim_import_persistence_all() -> void:
-	_run_enable_anim_import_persistence(PackedStringArray(["res://assets/animations/fbx animations"]))
-
-
-func _on_tool_rebuild_action_adventure_anim_lib() -> void:
-	_run_rebuild_action_adventure_animation_library()
-
 
 func _on_tool_replace_mesh_refs_with_obj() -> void:
 	_run_replace_mesh_refs_with_obj(_get_filesystem_selection())
 
-
 func _on_tool_replace_mesh_refs_with_obj_project() -> void:
 	_open_mesh_ref_replace_dialog()
-
 
 func _on_tool_force_thumbnail_refresh() -> void:
 	_run_force_thumbnail_refresh()
 
-
 func _on_tool_force_thumbnail_refresh_selected() -> void:
 	_run_force_thumbnail_refresh_selected(_get_filesystem_selection())
-
-
-func _on_tool_force_scene_filter_dry() -> void:
-	_run_force_scene_material_filtering_current_scene(true)
-
-
-func _on_tool_force_scene_filter_run() -> void:
-	_run_force_scene_material_filtering_current_scene(false)
-
-
-func _on_tool_optimize_for_editing() -> void:
-	_run_map_optimization("editing")
-
-
-func _on_tool_optimize_for_runtime() -> void:
-	_run_map_optimization("runtime")
-
-
-func _on_tool_new_densetsu_map() -> void:
-	var template_path := new_map_template_scene.strip_edges()
-	if template_path.is_empty():
-		push_warning("Densetsu Suite: Set 'new_map_template_scene' before creating a map.")
-		return
-	if not ResourceLoader.exists(template_path, "PackedScene"):
-		push_warning("Densetsu Suite: Template scene not found: " + template_path)
-		return
-	if not is_instance_valid(_new_map_dialog):
-		_build_new_map_dialog()
-	if not is_instance_valid(_new_map_dialog):
-		push_warning("Densetsu Suite: Failed to open new map dialog.")
-		return
-
-	var dir_path := new_map_output_dir.strip_edges()
-	if dir_path.is_empty():
-		dir_path = "res://"
-	var default_name := new_map_default_file.strip_edges()
-	if default_name.is_empty():
-		default_name = "new_densetsu_map.tscn"
-	_new_map_dialog.current_dir = dir_path
-	_new_map_dialog.current_file = default_name
-	_popup_window_fit_screen(_new_map_dialog, Vector2i(920, 620), Vector2i(680, 420))
-
 
 func _on_tool_spread_selected_on_floor() -> void:
 	var selected_nodes: Array[Node3D] = _get_selected_scene_nodes_3d()
@@ -1699,18 +1075,14 @@ func _on_tool_spread_selected_on_floor() -> void:
 		undo_redo.add_undo_property(node, "global_position", item.get("old_position", node.global_position))
 	undo_redo.commit_action()
 
-
 func _on_tool_prune_occluded_mesh_instances() -> void:
 	_run_prune_occluded_mesh_instances()
-
 
 func _on_tool_select_same_mesh_nodes() -> void:
 	_run_select_same_mesh_nodes()
 
-
 func _on_tool_select_intersecting_mesh_nodes() -> void:
 	_run_select_intersecting_mesh_nodes()
-
 
 func _get_selected_scene_nodes_3d() -> Array[Node3D]:
 	var out: Array[Node3D] = []
@@ -1740,7 +1112,6 @@ func _get_selected_scene_nodes_3d() -> Array[Node3D]:
 		if not has_selected_ancestor:
 			out.append(node)
 	return out
-
 
 func _compute_floor_spread_placements(selected_nodes: Array[Node3D]) -> Array[Dictionary]:
 	var scene_root: Node = get_editor_interface().get_edited_scene_root()
@@ -1815,7 +1186,6 @@ func _compute_floor_spread_placements(selected_nodes: Array[Node3D]) -> Array[Di
 		})
 	return placements
 
-
 func _collect_collision_exclude_rids(selected_nodes: Array[Node3D]) -> Array[RID]:
 	var out: Array[RID] = []
 	for node in selected_nodes:
@@ -1825,7 +1195,6 @@ func _collect_collision_exclude_rids(selected_nodes: Array[Node3D]) -> Array[RID
 			if child is CollisionObject3D:
 				out.append((child as CollisionObject3D).get_rid())
 	return out
-
 
 func _collect_floor_surface_aabbs(scene_root: Node, selection_set: Dictionary) -> Array[AABB]:
 	var out: Array[AABB] = []
@@ -1843,7 +1212,6 @@ func _collect_floor_surface_aabbs(scene_root: Node, selection_set: Dictionary) -
 		out.append(aabb)
 	return out
 
-
 func _is_under_selected_parent(node: Node, selection_set: Dictionary) -> bool:
 	var current: Node = node.get_parent()
 	while current != null:
@@ -1851,7 +1219,6 @@ func _is_under_selected_parent(node: Node, selection_set: Dictionary) -> bool:
 			return true
 		current = current.get_parent()
 	return false
-
 
 func _find_floor_height(scene_root: Node, floor_aabbs: Array[AABB], excluded_rids: Array[RID], x: float, z: float, fallback_y: float) -> float:
 	for child in scene_root.find_children("*", "", true, false):
@@ -1887,7 +1254,6 @@ func _find_floor_height(scene_root: Node, floor_aabbs: Array[AABB], excluded_rid
 			found = true
 	return best_height if found else fallback_y
 
-
 func _get_node_world_aabb(node: Node3D) -> AABB:
 	var has_bounds: bool = false
 	var merged: AABB = AABB()
@@ -1913,7 +1279,6 @@ func _get_node_world_aabb(node: Node3D) -> AABB:
 			merged = merged.merge(child_world_aabb)
 	return merged if has_bounds else AABB(node.global_position, Vector3.ZERO)
 
-
 func _transform_aabb(xform: Transform3D, aabb: AABB) -> AABB:
 	var corners: Array[Vector3] = [
 		aabb.position,
@@ -1933,160 +1298,68 @@ func _transform_aabb(xform: Transform3D, aabb: AABB) -> AABB:
 		world_max = world_max.max(point)
 	return AABB(world_min, world_max - world_min)
 
-
-func _on_new_map_file_selected(path: String) -> void:
-	var save_path := path
-	if not save_path.to_lower().ends_with(".tscn"):
-		save_path += ".tscn"
-	var result := _create_new_map_from_template(save_path)
-	if not bool(result.get("ok", false)):
-		push_error("Densetsu Suite: " + str(result.get("error", "Failed to create map scene.")))
-		return
-	var iface := get_editor_interface()
-	if iface:
-		iface.open_scene_from_path(save_path)
-	print("Densetsu Suite: New map scene created at " + save_path)
-
-
-func _create_new_map_from_template(save_path: String) -> Dictionary:
-	var template_path := new_map_template_scene.strip_edges()
-	if template_path.is_empty():
-		return {"ok": false, "error": "Template scene path is empty."}
-
-	var template_scene := load(template_path) as PackedScene
-	if template_scene == null:
-		return {"ok": false, "error": "Failed to load template scene: " + template_path}
-
-	var instance_root := template_scene.instantiate()
-	if not (instance_root is Node):
-		return {"ok": false, "error": "Template root is not a Node."}
-
-	var root_node := (instance_root as Node).duplicate(Node.DUPLICATE_SIGNALS | Node.DUPLICATE_GROUPS | Node.DUPLICATE_SCRIPTS)
-	instance_root.free()
-	if not (root_node is Node):
-		return {"ok": false, "error": "Failed to duplicate template instance."}
-
-	var scene_root := root_node as Node
-	_set_scene_owner_recursive(scene_root, scene_root)
-
-	var packed := PackedScene.new()
-	var pack_err := packed.pack(scene_root)
-	if pack_err != OK:
-		scene_root.free()
-		return {"ok": false, "error": "Failed to pack new scene. Error code: %d" % pack_err}
-
-	_ensure_res_output_dir(save_path)
-	var save_err := ResourceSaver.save(packed, save_path)
-	scene_root.free()
-	if save_err != OK:
-		return {"ok": false, "error": "Failed to save new scene. Error code: %d" % save_err}
-
-	return {"ok": true}
-
-
-func _set_scene_owner_recursive(node: Node, owner: Node) -> void:
-	for child in node.get_children():
-		if child is Node:
-			var child_node := child as Node
-			child_node.owner = owner
-			_set_scene_owner_recursive(child_node, owner)
-
-
-func _ensure_res_output_dir(res_path: String) -> void:
-	var dir_path := res_path.get_base_dir()
-	if dir_path.is_empty():
-		return
-	var abs_dir := ProjectSettings.globalize_path(dir_path)
-	DirAccess.make_dir_recursive_absolute(abs_dir)
-
-
 func _on_ctx_static_pack(paths: PackedStringArray = PackedStringArray()) -> void:
 	_run_static_pack(paths)
-
 
 func _on_ctx_extract_mesh_per_file(paths: PackedStringArray = PackedStringArray()) -> void:
 	_run_array_extract(paths, 0, 0)
 
-
 func _on_ctx_extract_mesh_common(paths: PackedStringArray = PackedStringArray()) -> void:
 	_run_array_extract(paths, 0, 1)
-
 
 func _on_ctx_extract_material_per_file(paths: PackedStringArray = PackedStringArray()) -> void:
 	_run_array_extract(paths, 1, 0)
 
-
 func _on_ctx_extract_material_common(paths: PackedStringArray = PackedStringArray()) -> void:
 	_run_array_extract(paths, 1, 1)
-
 
 func _on_ctx_extract_combined_per_file(paths: PackedStringArray = PackedStringArray()) -> void:
 	_run_array_extract(paths, 2, 0)
 
-
 func _on_ctx_extract_combined_common(paths: PackedStringArray = PackedStringArray()) -> void:
 	_run_array_extract(paths, 2, 1)
-
 
 func _on_ctx_resize_overwrite(paths: PackedStringArray = PackedStringArray()) -> void:
 	_run_texture_resize(paths, 0)
 
-
 func _on_ctx_resize_copy(paths: PackedStringArray = PackedStringArray()) -> void:
 	_run_texture_resize(paths, 1)
-
 
 func _on_ctx_flip_image_h(paths: PackedStringArray = PackedStringArray()) -> void:
 	_run_image_transform(paths, IMAGE_TRANSFORM_FLIP_H)
 
-
 func _on_ctx_flip_image_v(paths: PackedStringArray = PackedStringArray()) -> void:
 	_run_image_transform(paths, IMAGE_TRANSFORM_FLIP_V)
-
 
 func _on_ctx_rotate_image_90(paths: PackedStringArray = PackedStringArray()) -> void:
 	_run_image_transform(paths, IMAGE_TRANSFORM_ROT_90)
 
-
 func _on_ctx_rotate_image_180(paths: PackedStringArray = PackedStringArray()) -> void:
 	_run_image_transform(paths, IMAGE_TRANSFORM_ROT_180)
-
 
 func _on_ctx_rotate_image_270(paths: PackedStringArray = PackedStringArray()) -> void:
 	_run_image_transform(paths, IMAGE_TRANSFORM_ROT_270)
 
-
 func _on_ctx_pivot_center_mass(paths: PackedStringArray = PackedStringArray()) -> void:
 	_run_pivot_reassign(paths, PIVOT_MODE_CENTER_MASS)
-
 
 func _on_ctx_pivot_center_bottom(paths: PackedStringArray = PackedStringArray()) -> void:
 	_run_pivot_reassign(paths, PIVOT_MODE_CENTER_BOTTOM)
 
-
 func _on_ctx_convert_mesh_res_to_obj(paths: PackedStringArray = PackedStringArray()) -> void:
 	_run_convert_mesh_res_to_obj(paths)
-
 
 func _on_ctx_subdivide_mesh_to_obj(paths: PackedStringArray = PackedStringArray()) -> void:
 	_run_subdivide_mesh_to_obj(paths)
 
-
-func _on_ctx_enable_anim_import_persistence(paths: PackedStringArray = PackedStringArray()) -> void:
-	_run_enable_anim_import_persistence(paths)
-
-
 func _on_ctx_replace_mesh_refs_with_obj(paths: PackedStringArray = PackedStringArray()) -> void:
 	_run_replace_mesh_refs_with_obj(paths)
-
 
 func _on_ctx_move_selected_to_folder(paths: PackedStringArray = PackedStringArray()) -> void:
 	_open_move_dialog(paths)
 
-
 func _on_ctx_force_thumbnail_refresh_selected(paths: PackedStringArray = PackedStringArray()) -> void:
 	_run_force_thumbnail_refresh_selected(paths)
-
 
 func _clear_project_editor_cache() -> int:
 	var removed: int = 0
@@ -2105,7 +1378,6 @@ func _clear_project_editor_cache() -> int:
 			if DirAccess.remove_absolute(file_path) == OK:
 				removed += 1
 	return removed
-
 
 func _clear_project_editor_cache_for_files(file_names: PackedStringArray) -> int:
 	var removed: int = 0
@@ -2131,7 +1403,6 @@ func _clear_project_editor_cache_for_files(file_names: PackedStringArray) -> int
 				break
 	return removed
 
-
 func _clear_user_thumbnail_cache() -> int:
 	var removed: int = 0
 	var appdata: String = OS.get_environment("APPDATA")
@@ -2151,7 +1422,6 @@ func _clear_user_thumbnail_cache() -> int:
 				removed += 1
 	return removed
 
-
 func _collect_files_recursive_absolute(dir_path: String, out: PackedStringArray) -> void:
 	var dir: DirAccess = DirAccess.open(dir_path)
 	if dir == null:
@@ -2170,7 +1440,6 @@ func _collect_files_recursive_absolute(dir_path: String, out: PackedStringArray)
 			out.append(full_path)
 	dir.list_dir_end()
 
-
 func _expand_selected_resource_paths(paths: PackedStringArray) -> PackedStringArray:
 	var out: PackedStringArray = PackedStringArray()
 	for p in paths:
@@ -2182,13 +1451,11 @@ func _expand_selected_resource_paths(paths: PackedStringArray) -> PackedStringAr
 			out.append(p)
 	return out
 
-
 func _is_resource_dir(path: String) -> bool:
 	if path.is_empty():
 		return false
 	var abs_path: String = ProjectSettings.globalize_path(path)
 	return DirAccess.dir_exists_absolute(abs_path)
-
 
 func _collect_resource_files_recursive(dir_path: String, out: PackedStringArray) -> void:
 	var dir: DirAccess = DirAccess.open(dir_path)
@@ -2210,14 +1477,3 @@ func _collect_resource_files_recursive(dir_path: String, out: PackedStringArray)
 			out.append(full_path)
 	dir.list_dir_end()
 
-
-func _on_tool_build_test_release_regular() -> void:
-	_run_test_release_regular()
-
-
-func _on_tool_build_test_release_current_scene() -> void:
-	_run_test_release_current_scene()
-
-
-func _on_tool_git_pull_main() -> void:
-	_run_git_pull_main()
