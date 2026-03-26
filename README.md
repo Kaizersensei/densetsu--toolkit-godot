@@ -1,14 +1,19 @@
 # Densetsu Toolkit
 
-Standalone extraction of the Densetsu editor toolkit from the main Densetsu project.
+Public, project-agnostic extraction of the Densetsu editor toolkit.
 
 Included:
-- `addons/densetsu_tool_suite`
-- helper exporter dependency: `addons/densetsu_geometry_obj_export/scene_geometry_obj_exporter.gd`
-- related automation scripts under `engine3d/tools`
-- supporting scripts/templates used directly by the toolkit
+- geometry utilities
+- texture/image utilities
+- move helper
+- selection and occlusion helpers
+- scene floor-spread helper
 
-Notes:
-- This is extracted from the main project and still contains project-specific paths and assumptions.
-- It is intended to be used from a project root preserving the same relative layout.
-- Git/release publishing scripts may need retargeting for a different host.
+Excluded from the public release:
+- git and release publishing tools
+- project-specific build and optimization scripts
+- map creation helpers tied to Densetsu project structure
+- animation-library and import-flag automation tied to Densetsu asset folders
+
+Layout note:
+- this repo preserves the original relative paths used by the addon so the remaining tools stay self-contained.

@@ -220,7 +220,6 @@ class _DensetsuSuiteContextMenuPlugin:
 		add_context_menu_item("Densetsu: Reassign Pivot (Center Bottom)", Callable(_owner, "_on_ctx_pivot_center_bottom"))
 		add_context_menu_item("Densetsu: Convert Mesh TRES/RES to OBJ", Callable(_owner, "_on_ctx_convert_mesh_res_to_obj"))
 		add_context_menu_item("Densetsu: Subdivide Mesh -> OBJ (1x/2x/4x)", Callable(_owner, "_on_ctx_subdivide_mesh_to_obj"))
-		add_context_menu_item("Densetsu: Enable Imported Animation Persistence", Callable(_owner, "_on_ctx_enable_anim_import_persistence"))
 		add_context_menu_item("Densetsu: Replace Scene TRES/RES Refs with Selected OBJ", Callable(_owner, "_on_ctx_replace_mesh_refs_with_obj"))
 		add_context_menu_item("Densetsu: Move Selected To Folder...", Callable(_owner, "_on_ctx_move_selected_to_folder"))
 		add_context_menu_item("Densetsu: Force Thumbnail Refresh (Selected)", Callable(_owner, "_on_ctx_force_thumbnail_refresh_selected"))
@@ -233,7 +232,6 @@ func _enter_tree() -> void:
 	_image_transform_helper = _instantiate_plugin(IMAGE_TRANSFORM_HELPER_SCRIPT)
 	_pivot_reassign_helper = _instantiate_plugin(PIVOT_REASSIGN_HELPER_SCRIPT)
 	_mesh_obj_helper = _instantiate_plugin(MESH_OBJ_HELPER_SCRIPT)
-	_fbx_anim_persist_helper = _instantiate_plugin(FBX_ANIM_PERSIST_HELPER_SCRIPT)
 	_occlusion_prune_helper = _instantiate_plugin(OCCLUSION_PRUNE_HELPER_SCRIPT)
 	_select_same_mesh_helper = _instantiate_plugin(SELECT_SAME_MESH_HELPER_SCRIPT)
 	_select_intersecting_mesh_helper = _instantiate_plugin(SELECT_INTERSECTING_MESH_HELPER_SCRIPT)
@@ -312,15 +310,9 @@ func _build_tool_menus() -> void:
 	var scene_menu: PopupMenu = _create_tool_submenu("Scene")
 	var geometry_menu: PopupMenu = _create_tool_submenu("Geometry")
 	var textures_menu: PopupMenu = _create_tool_submenu("Textures")
-	var animation_menu: PopupMenu = _create_tool_submenu("Animation")
 	var maintenance_menu: PopupMenu = _create_tool_submenu("Maintenance")
-	var build_menu: PopupMenu = _create_tool_submenu("Build")
-	var optimization_menu: PopupMenu = _create_tool_submenu("Optimization")
 	var assets_menu: PopupMenu = _create_tool_submenu("Assets")
-	var git_menu: PopupMenu = _create_tool_submenu("Git")
 
-	_register_tool_menu_item(scene_menu, ToolMenuId.NEW_MAP, "New Densetsu Map", _on_tool_new_densetsu_map)
-	scene_menu.add_separator()
 	_register_tool_menu_item(scene_menu, ToolMenuId.SPREAD_SELECTED_ON_FLOOR, "Spread Selected On Floor", _on_tool_spread_selected_on_floor)
 	scene_menu.add_separator()
 	_register_tool_menu_item(scene_menu, ToolMenuId.SELECT_SAME_MESH, "Select Nodes With Same Mesh As Selected", _on_tool_select_same_mesh_nodes)
@@ -353,28 +345,12 @@ func _build_tool_menus() -> void:
 	_register_tool_menu_item(textures_menu, ToolMenuId.ROTATE_IMAGE_180, "Rotate Image 180 (Copy)", _on_tool_rotate_image_180)
 	_register_tool_menu_item(textures_menu, ToolMenuId.ROTATE_IMAGE_270, "Rotate Image 270 (Copy)", _on_tool_rotate_image_270)
 
-	_register_tool_menu_item(animation_menu, ToolMenuId.ENABLE_ANIM_IMPORT_PERSISTENCE, "Enable Imported Animation Persistence (Selected)", _on_tool_enable_anim_import_persistence)
-	_register_tool_menu_item(animation_menu, ToolMenuId.ENABLE_ANIM_IMPORT_PERSISTENCE_ALL, "Enable Imported Animation Persistence (FBX Animations Folder)", _on_tool_enable_anim_import_persistence_all)
-	animation_menu.add_separator()
-	_register_tool_menu_item(animation_menu, ToolMenuId.REBUILD_ACTION_ADVENTURE_ANIM_LIB, "Rebuild ActionAdventure Animation Library", _on_tool_rebuild_action_adventure_anim_lib)
-
 	_register_tool_menu_item(maintenance_menu, ToolMenuId.FORCE_THUMBNAIL_REFRESH, "Force Thumbnail Refresh", _on_tool_force_thumbnail_refresh)
 	_register_tool_menu_item(maintenance_menu, ToolMenuId.FORCE_THUMBNAIL_REFRESH_SELECTED, "Force Thumbnail Refresh (Selected)", _on_tool_force_thumbnail_refresh_selected)
-	maintenance_menu.add_separator()
-	_register_tool_menu_item(maintenance_menu, ToolMenuId.FORCE_SCENE_FILTER_DRY, "Force Scene Material Filtering (Current Scene, Dry Run)", _on_tool_force_scene_filter_dry)
-	_register_tool_menu_item(maintenance_menu, ToolMenuId.FORCE_SCENE_FILTER_RUN, "Force Scene Material Filtering (Current Scene)", _on_tool_force_scene_filter_run)
-
-	_register_tool_menu_item(build_menu, ToolMenuId.BUILD_TEST_RELEASE_REGULAR, "Build Test Release (Regular)", _on_tool_build_test_release_regular)
-	_register_tool_menu_item(build_menu, ToolMenuId.BUILD_TEST_RELEASE_CURRENT_SCENE, "Build Test Release (Current Scene)", _on_tool_build_test_release_current_scene)
-
-	_register_tool_menu_item(optimization_menu, ToolMenuId.OPTIMIZE_EDITING, "Optimize for Editing", _on_tool_optimize_for_editing)
-	_register_tool_menu_item(optimization_menu, ToolMenuId.OPTIMIZE_RUNTIME, "Optimize for Runtime Efficiency", _on_tool_optimize_for_runtime)
 
 	_register_tool_menu_item(assets_menu, ToolMenuId.MOVE_SELECTED_TO_FOLDER, "Move Selected To Folder...", _on_tool_move_selected_to_folder)
 	assets_menu.add_separator()
 	_register_tool_menu_item(assets_menu, ToolMenuId.POSER_CR2_TO_GLTF, "Convert Poser CR2 to glTF...", _on_tool_poser_cr2_to_gltf)
-
-	_register_tool_menu_item(git_menu, ToolMenuId.GIT_PULL_MAIN, "Full Pull to Main", _on_tool_git_pull_main)
 
 	add_tool_submenu_item(DENSETSU_TOOL_MENU_ROOT, _tool_root_menu)
 
