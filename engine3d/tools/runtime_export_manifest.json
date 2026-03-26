@@ -1,0 +1,51 @@
+{
+  "version": 1,
+  "hard_paths": [
+    "res://engine3d/actors/ActorPlayer3D.tscn",
+    "res://engine3d/combat/projectiles/ActorProjectileSpawner3D.gd",
+    "res://engine3d/combat/AttackFXDriver3D.gd",
+    "res://engine3d/postfx/SobelOutlineDepthPostFX3D.tscn",
+    "res://shaders/postfx/sobel_outline_from_viewport.gdshader",
+    "res://shaders/postfx/sobel_outline_depth_spatial.gdshader",
+    "res://shaders/postfx/color_grading_screen.gdshader",
+    "res://shaders/sky/densetsu_sky.gdshader",
+    "res://shaders/sky/cloud_layer_base_material_adapter.gdshader"
+  ],
+  "slot_names": [
+    "target_scene_path",
+    "loading_screen_scene",
+    "loading_content_scene",
+    "startup_splash_scenes",
+    "content_scene",
+    "player_scene",
+    "first_person_model_scene",
+    "movement_data",
+    "model_data",
+    "camera_data",
+    "stats_data",
+    "formulas_data",
+    "equipped_weapon_scene",
+    "projectile_scene",
+    "projectile_template",
+    "projectile_behavior_script",
+    "fire_sfx",
+    "visual_scene",
+    "fallback_mesh",
+    "material_override",
+    "hour_gradient",
+    "moon_surface_material",
+    "target_toon_shader_path"
+  ],
+  "exclude_patterns": [
+    "res://addons/terrain_3d/src/*",
+    "res://addons/terrain_3d/menu/*",
+    "res://addons/terrain_3d/tools/*",
+    "res://addons/terrain_3d/brushes/*",
+    "res://addons/terrain_3d/extras/*",
+    "res://addons/UniParticles3D/plugin.gd",
+    "res://addons/UniParticles3D/uniparticle_preview.*",
+    "res://addons/*/plugin.cfg",
+    "res://addons/waterways_net/WaterwaysPlugin.gd",
+    "res://addons/waterways_net/UI/*"
+  ]
+}
